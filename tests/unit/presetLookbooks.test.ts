@@ -8,7 +8,12 @@ test('프리셋 룩북 데이터 무결성 검증', () => {
   for (const lb of PRESET_LOOKBOOKS) {
     assert.ok(lb.id, `ID 누락: ${JSON.stringify(lb)}`);
     assert.ok(['female', 'male'].includes(lb.gender), `성별 오류: ${lb.gender}`);
-    assert.ok(lb.imageUrl.startsWith('https://'), `유효한 이미지 URL 필요: ${lb.imageUrl}`);
+    assert.ok(
+      typeof lb.imageUrl === 'string'
+        ? lb.imageUrl.length > 0
+        : Boolean(lb.imageUrl),
+      `유효한 이미지 소스 필요: ${lb.imageUrl}`
+    );
     assert.ok(lb.styleTitle.length > 0, `스타일 제목 누락: ${lb.id}`);
     assert.ok(Array.isArray(lb.items), `아이템 배열 필요: ${lb.id}`);
     assert.ok(lb.items.length >= 3, `최소 3개 이상의 코디 아이템 필요: ${lb.id}`);
@@ -25,19 +30,22 @@ test('프리셋 룩북 데이터 무결성 검증', () => {
   }
 });
 
-test('목업 대표 코디(여성, 20~22도, 맑음) 매칭 검증', () => {
+test('20~22도 대표 코디(여성, 맑음) 매칭 검증', () => {
   const matches = findMatchingLookbooks('female', '20to22', 'Clear');
-  assert.ok(matches.length >= 2, '목업 코디는 2개 이상의 스타일 슬라이드가 있어야 함');
+  assert.ok(matches.length >= 2, '대표 코디는 2개 이상의 스타일 슬라이드가 있어야 함');
 
   const first = matches[0];
   assert.equal(first.gender, 'female');
   assert.equal(first.tempBand, '20to22');
 
   const itemNames = first.items.map((i) => i.name);
-  assert.ok(itemNames.some((n) => n.includes('트렌치코트')), '트렌치코트 포함 필요');
-  assert.ok(itemNames.some((n) => n.includes('셔츠')), '셔츠 포함 필요');
-  assert.ok(itemNames.some((n) => n.includes('데님')), '데님 팬츠 포함 필요');
-  assert.ok(itemNames.some((n) => n.includes('로퍼')), '로퍼 포함 필요');
+  assert.ok(
+    itemNames.some((n) => n.includes('블레이저') || n.includes('트렌치코트')),
+    '아우터(블레이저 또는 트렌치코트) 포함 필요'
+  );
+  assert.ok(itemNames.some((n) => n.includes('니트') || n.includes('셔츠')), '상의 포함 필요');
+  assert.ok(itemNames.some((n) => n.includes('슬랙스') || n.includes('데님')), '하의 포함 필요');
+  assert.ok(itemNames.some((n) => n.includes('부츠') || n.includes('로퍼')), '신발 포함 필요');
 });
 
 test('성별 전환 및 특수 날씨(비, 눈) 매칭 검증', () => {

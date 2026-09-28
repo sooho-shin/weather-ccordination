@@ -3,14 +3,16 @@ import { StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 
 interface FullscreenBackgroundProps {
-  imageUrl: string;
+  imageUrl: any;
 }
 
 export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imageUrl }) => {
+  const imageSource = typeof imageUrl === 'string' ? { uri: imageUrl } : imageUrl;
+
   return (
     <View style={StyleSheet.absoluteFill}>
       <Image
-        source={{ uri: imageUrl }}
+        source={imageSource}
         style={styles.image}
         contentFit="cover"
         transition={600}

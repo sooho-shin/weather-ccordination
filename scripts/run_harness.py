@@ -132,7 +132,8 @@ def main():
 
     # Stage 2: 비즈니스/도메인 유닛 테스트
     ok_test, out_test = run_command(
-        "npx tsx --test tests/unit/*.test.ts", "STAGE 2: 핵심 도메인 유닛 테스트"
+        "npx tsx --import ./tests/setup.cjs --test tests/unit/*.test.ts",
+        "STAGE 2: 핵심 도메인 유닛 테스트",
     )
     results["unit_tests"] = "PASS" if ok_test else "FAIL"
     if not ok_test:

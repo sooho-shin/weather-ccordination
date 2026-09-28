@@ -17,7 +17,7 @@ export interface OutfitLookbook {
   weatherState: WeatherState;
   styleTitle: string;
   styleDescription: string;
-  imageUrl: string;
+  imageUrl: any;
   items: OutfitItem[];
   imageSource: 'preset' | 'ai';
   generatedAt?: string;
