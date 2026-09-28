@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { StyleSheet, View, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, SafeAreaView, TouchableOpacity, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 import { Gender, WeatherData, WeatherState } from './src/types/weather';
 import { OutfitLookbook } from './src/types/outfit';
@@ -90,6 +91,36 @@ export default function App() {
     setActiveSlideIndex(0);
   };
 
+  // 다음/이전 룩북 순환 핸들러 (5대 스타일 순환)
+  const handleNextLookbook = useCallback(() => {
+    setActiveSlideIndex((prev) => (prev + 1) % availableLookbooks.length);
+  }, [availableLookbooks.length]);
+
+  const handlePrevLookbook = useCallback(() => {
+    setActiveSlideIndex(
+      (prev) => (prev - 1 + availableLookbooks.length) % availableLookbooks.length
+    );
+  }, [availableLookbooks.length]);
+
+  const handleRefreshLookbook = useCallback(() => {
+    setActiveSlideIndex((prev) => (prev + 1) % availableLookbooks.length);
+  }, [availableLookbooks.length]);
+
+  // 웹 브라우저 환경에서 좌우 방향키로 룩북 넘기기 지원
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+          handleNextLookbook();
+        } else if (e.key === 'ArrowLeft') {
+          handlePrevLookbook();
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [handleNextLookbook, handlePrevLookbook]);
+
   // AI 생성 완료 핸들러
   const handleGenerationSuccess = (newLookbook: OutfitLookbook) => {
     setAiCustomLookbook(newLookbook);
@@ -114,7 +145,27 @@ export default function App() {
           onToggleGender={handleToggleGender}
           onOpenSimulator={() => setSimulatorVisible(true)}
           onOpenAIGenerator={() => setAiModalVisible(true)}
+          onRefreshLookbook={handleRefreshLookbook}
         />
+
+        {/* 좌우 코디 넘기기 플로팅 버튼 */}
+        <View style={styles.sideNavRow} pointerEvents="box-none">
+          <TouchableOpacity
+            style={styles.navChevronBtn}
+            onPress={handlePrevLookbook}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navChevronBtn}
+            onPress={handleNextLookbook}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
 
         {/* 하단 글래스모피즘 코디 가이드 시트 */}
         {currentLookbook && (
@@ -123,6 +174,7 @@ export default function App() {
             currentIndex={safeIndex}
             totalCount={availableLookbooks.length}
             onSelectIndex={(index) => setActiveSlideIndex(index)}
+            onNextLookbook={handleNextLookbook}
             onOpenAIGenerator={() => setAiModalVisible(true)}
           />
         )}
@@ -156,5 +208,24 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  sideNavRow: {
+    position: 'absolute',
+    top: '48%',
+    left: 12,
+    right: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 10,
+  },
+  navChevronBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
   },
 });

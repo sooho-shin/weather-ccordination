@@ -17,6 +17,7 @@ interface StyleGuideSheetProps {
   currentIndex: number;
   totalCount: number;
   onSelectIndex: (index: number) => void;
+  onNextLookbook: () => void;
   onOpenAIGenerator: () => void;
 }
 
@@ -25,6 +26,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   currentIndex,
   totalCount,
   onSelectIndex,
+  onNextLookbook,
   onOpenAIGenerator,
 }) => {
   return (
@@ -33,7 +35,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
         {/* 상단 탭 헤더 */}
         <View style={styles.header}>
           <View style={styles.styleGuideBadge}>
-            <Text style={styles.styleGuideText}>STYLE GUIDE</Text>
+            <Text style={styles.styleGuideText}>STYLE GUIDE ({currentIndex + 1}/{totalCount})</Text>
             <Ionicons name="chevron-down" size={14} color="#6C6C70" style={{ marginLeft: 2 }} />
           </View>
           <Text style={styles.title}>오늘의 코디 추천</Text>
@@ -67,15 +69,26 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             ))}
           </View>
 
-          {/* AI 다른 코디 생성 버튼 */}
-          <TouchableOpacity
-            style={styles.aiButton}
-            onPress={onOpenAIGenerator}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="sparkles" size={14} color="#000" />
-            <Text style={styles.aiButtonLabel}>AI 다른 코디 생성</Text>
-          </TouchableOpacity>
+          {/* 버튼 그룹: 다음 스타일 새로고침 & AI 모달 */}
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
+              style={styles.nextStyleBtn}
+              onPress={onNextLookbook}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="refresh" size={13} color="#000000" />
+              <Text style={styles.nextStyleBtnText}>다음 코디</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.aiButton}
+              onPress={onOpenAIGenerator}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="sparkles" size={13} color="#FF9500" />
+              <Text style={styles.aiButtonLabel}>AI 맞춤</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </BlurView>
     </View>
@@ -169,16 +182,37 @@ const styles = StyleSheet.create({
     width: 7,
     backgroundColor: 'rgba(0, 0, 0, 0.22)',
   },
-  aiButton: {
+  buttonGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 12,
+    gap: 8,
+  },
+  nextStyleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 11,
     paddingVertical: 6,
     borderRadius: 16,
     gap: 4,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+  },
+  nextStyleBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#000000',
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.12)',
   },
   aiButtonLabel: {
     fontSize: 12,

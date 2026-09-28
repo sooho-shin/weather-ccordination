@@ -9,6 +9,7 @@ interface WeatherHeaderProps {
   onToggleGender: () => void;
   onOpenSimulator: () => void;
   onOpenAIGenerator: () => void;
+  onRefreshLookbook?: () => void;
 }
 
 export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
@@ -17,6 +18,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onToggleGender,
   onOpenSimulator,
   onOpenAIGenerator,
+  onRefreshLookbook,
 }) => {
   const getWeatherIcon = () => {
     switch (weather.weatherState) {
@@ -113,6 +115,17 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
 
         {/* 유틸리티 액션 버튼들 */}
         <View style={styles.actionButtonsRow}>
+          {onRefreshLookbook && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onRefreshLookbook}
+              activeOpacity={0.7}
+              accessibilityLabel="코디 새로고침"
+            >
+              <Ionicons name="refresh-outline" size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             style={styles.iconButton}
             onPress={onOpenSimulator}
