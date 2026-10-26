@@ -52,7 +52,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             {isAiGenerated && (
               <View style={styles.aiBadge}>
                 <Ionicons name="sparkles" size={11} color="#FF9500" />
-                <Text style={styles.aiBadgeText}>DeepSeek V4.1 AI</Text>
+                <Text style={styles.aiBadgeText}>AI Curation</Text>
               </View>
             )}
           </View>
@@ -121,7 +121,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
                 <Ionicons name="sparkles" size={13} color="#FF9500" />
               )}
               <Text style={styles.aiButtonLabel}>
-                {isAiGenerating ? 'AI 분석중...' : 'DeepSeek AI'}
+                {isAiGenerating ? 'AI 분석중...' : 'AI 맞춤'}
               </Text>
             </TouchableOpacity>
 
