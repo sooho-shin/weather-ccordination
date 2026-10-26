@@ -21,6 +21,8 @@ interface StyleGuideSheetProps {
   onShuffle: () => void;
   onOpenAIGenerator: () => void;
   onQuickAiGenerate?: () => void;
+  onSaveToWardrobe?: () => void;
+  isSavedToWardrobe?: boolean;
   isAiGenerating?: boolean;
   isAiGenerated?: boolean;
 }
@@ -33,6 +35,8 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   onShuffle,
   onOpenAIGenerator,
   onQuickAiGenerate,
+  onSaveToWardrobe,
+  isSavedToWardrobe = false,
   isAiGenerating = false,
   isAiGenerated = false,
 }) => {
@@ -124,6 +128,25 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
                 {isAiGenerating ? 'AI 분석중...' : 'AI 맞춤'}
               </Text>
             </TouchableOpacity>
+
+            {/* 옷장에 저장 (D1 + R2) 버튼 */}
+            {onSaveToWardrobe && (
+              <TouchableOpacity
+                style={[styles.bookmarkBtn, isSavedToWardrobe && styles.bookmarkBtnActive]}
+                onPress={onSaveToWardrobe}
+                activeOpacity={0.8}
+                accessibilityLabel="내 옷장에 저장"
+              >
+                <Ionicons
+                  name={isSavedToWardrobe ? 'bookmark' : 'bookmark-outline'}
+                  size={14}
+                  color={isSavedToWardrobe ? '#FF9500' : '#000000'}
+                />
+                <Text style={[styles.bookmarkText, isSavedToWardrobe && styles.bookmarkTextActive]}>
+                  {isSavedToWardrobe ? '보관됨' : '저장'}
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.moreAiBtn}
@@ -337,6 +360,29 @@ const styles = StyleSheet.create({
   },
   aiButtonDisabled: {
     opacity: 0.6,
+  },
+  bookmarkBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  bookmarkBtnActive: {
+    borderColor: '#FF9500',
+    backgroundColor: 'rgba(255, 149, 0, 0.06)',
+  },
+  bookmarkText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#000000',
+  },
+  bookmarkTextActive: {
+    color: '#FF9500',
   },
   moreAiBtn: {
     width: 28,

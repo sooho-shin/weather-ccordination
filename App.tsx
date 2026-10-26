@@ -17,7 +17,9 @@ import { TpoTabBar } from './src/components/TpoTabBar';
 import { StyleGuideSheet } from './src/components/StyleGuideSheet';
 import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
+import { WardrobeModal } from './src/components/WardrobeModal';
 import { generateOotdWithDeepSeek, isDeepSeekConfigured } from './src/services/ai/deepseekService';
+import { saveOutfitToWardrobe } from './src/services/wardrobeService';
 
 export default function App() {
   // 0. 웹 및 네이티브 폰트 안전 로드
@@ -80,6 +82,8 @@ export default function App() {
 
   const [simulatorVisible, setSimulatorVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [wardrobeVisible, setWardrobeVisible] = useState(false);
+  const [savedOutfitIds, setSavedOutfitIds] = useState<Set<string>>(() => new Set());
 
   // 2. 실시간 GPS 위치 및 실제 날씨 비동기 로딩
   const loadRealWeather = useCallback(async () => {
@@ -217,6 +221,25 @@ export default function App() {
     setActiveSlideIndex(0);
   };
 
+  // 내 옷장 (D1 + R2) 코디 저장 핸들러
+  const handleSaveCurrentOutfit = useCallback(async () => {
+    if (!currentLookbook) return;
+    try {
+      const res = await saveOutfitToWardrobe(currentLookbook, weather);
+      if (res.success) {
+        setSavedOutfitIds((prev) => new Set(prev).add(currentLookbook.id));
+      }
+    } catch (err) {
+      console.warn('옷장 저장 실패:', err);
+    }
+  }, [currentLookbook, weather]);
+
+  // 옷장에서 선택한 코디를 메인 배경에 적용
+  const handleApplyWardrobeOutfit = useCallback((outfit: OutfitLookbook) => {
+    setAiCustomLookbook(outfit);
+    setActiveSlideIndex(0);
+  }, []);
+
   // 실시간 TheHive DeepSeek V4.1 AI 코디 추천 생성 핸들러
   const handleQuickAiRecommend = useCallback(async () => {
     if (isAiGenerating) return;
@@ -257,6 +280,7 @@ export default function App() {
             onSelectGender={handleSelectGender}
             onOpenSimulator={() => setSimulatorVisible(true)}
             onOpenAIGenerator={() => setAiModalVisible(true)}
+            onOpenWardrobe={() => setWardrobeVisible(true)}
             isWeatherReady={isWeatherReady}
           />
 
@@ -298,6 +322,8 @@ export default function App() {
             onShuffle={handleShuffleLookbook}
             onOpenAIGenerator={() => setAiModalVisible(true)}
             onQuickAiGenerate={handleQuickAiRecommend}
+            onSaveToWardrobe={handleSaveCurrentOutfit}
+            isSavedToWardrobe={Boolean(currentLookbook && savedOutfitIds.has(currentLookbook.id))}
             isAiGenerating={isAiGenerating}
             isAiGenerated={currentLookbook.imageSource === 'ai'}
           />
@@ -319,6 +345,12 @@ export default function App() {
         gender={gender === 'all' ? 'female' : gender}
         onClose={() => setAiModalVisible(false)}
         onGenerationSuccess={handleGenerationSuccess}
+      />
+
+      <WardrobeModal
+        visible={wardrobeVisible}
+        onClose={() => setWardrobeVisible(false)}
+        onApplyOutfit={handleApplyWardrobeOutfit}
       />
     </View>
   );

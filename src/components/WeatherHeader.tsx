@@ -9,6 +9,7 @@ interface WeatherHeaderProps {
   onSelectGender: (gender: Gender) => void;
   onOpenSimulator: () => void;
   onOpenAIGenerator: () => void;
+  onOpenWardrobe?: () => void;
   isWeatherReady?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onSelectGender,
   onOpenSimulator,
   onOpenAIGenerator,
+  onOpenWardrobe,
   isWeatherReady = true,
 }) => {
   const getWeatherIcon = () => {
@@ -70,6 +72,17 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
 
         {/* 유틸리티 액션 버튼 (미니멀) */}
         <View style={styles.actionButtonsRow}>
+          {onOpenWardrobe && (
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={onOpenWardrobe}
+              activeOpacity={0.7}
+              accessibilityLabel="내 옷장 보관함"
+            >
+              <Ionicons name="bookmark-outline" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             style={styles.iconButton}
             onPress={onOpenSimulator}

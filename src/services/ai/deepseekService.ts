@@ -71,12 +71,24 @@ function cleanAndParseJson(content: string): any {
   let text = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
   text = text.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```$/g, '').trim();
 
+  // 가장 외곽의 { ... } JSON 블록 추출
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
-    return JSON.parse(jsonMatch[0]);
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch {}
   }
 
-  return JSON.parse(text);
+  // 끝부분이 미세하게 잘린 경우 보정 시도
+  try {
+    return JSON.parse(text);
+  } catch {
+    // 닫는 괄호 누락 복구 시도
+    if (text.startsWith('{') && !text.endsWith('}')) {
+      return JSON.parse(text + '"}');
+    }
+    throw new Error('JSON 파싱 오류');
+  }
 }
 
 /**
@@ -217,7 +229,7 @@ export async function generateOotdWithDeepSeek(
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.85,
-        max_tokens: 1200,
+        max_tokens: 2500,
       }),
       signal: controller.signal,
     });

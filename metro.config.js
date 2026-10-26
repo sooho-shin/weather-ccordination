@@ -1,5 +1,11 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const https = require('https');
+const {
+  saveOutfitToD1AndR2,
+  getSavedOutfitsFromD1,
+  deleteOutfitFromD1AndR2,
+  getR2ImageFile,
+} = require('./src/services/db/localD1R2Store');
 
 const config = getDefaultConfig(__dirname);
 
@@ -32,7 +38,7 @@ function proxyHiveRequest(targetUrl, reqBody, clientRes) {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       });
       clientRes.end(body);
     });
@@ -50,22 +56,92 @@ function proxyHiveRequest(targetUrl, reqBody, clientRes) {
   proxyReq.end();
 }
 
-// 개발 서버 미들웨어 확장 (로컬 브라우저 CORS 문제 해결)
+// 개발 서버 미들웨어 확장 (로컬 D1 SQLite + R2 이미지 스토어 에뮬레이션)
 config.server = {
   ...config.server,
   enhanceMiddleware: (metroMiddleware) => {
-    return (req, res, next) => {
+    return async (req, res, next) => {
       // CORS Preflight 처리
       if (req.method === 'OPTIONS') {
         res.writeHead(200, {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Headers': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
         });
         res.end();
         return;
       }
 
+      // 1. [R2 로컬 에뮬레이션] 이미지 스트리밍 서빙 (/api/images/outfits/...)
+      if (req.url.startsWith('/api/images/')) {
+        const imageKey = req.url.replace('/api/images/', '').split('?')[0];
+        const buffer = getR2ImageFile(imageKey);
+        if (buffer) {
+          res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=86400',
+            'Access-Control-Allow-Origin': '*',
+          });
+          res.end(buffer);
+        } else {
+          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.end('Image not found in local R2 store');
+        }
+        return;
+      }
+
+      // 2. [D1 + R2 로컬 에뮬레이션] 내 옷장 저장/조회/삭제 API (/api/wardrobe)
+      if (req.url.startsWith('/api/wardrobe')) {
+        const urlObj = new URL(req.url, 'http://localhost:8081');
+
+        if (req.method === 'GET') {
+          const list = getSavedOutfitsFromD1();
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          });
+          res.end(JSON.stringify({ success: true, outfits: list }));
+          return;
+        }
+
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', (c) => (body += c));
+          req.on('end', async () => {
+            try {
+              const payload = JSON.parse(body || '{}');
+              const saved = await saveOutfitToD1AndR2(payload);
+              res.writeHead(200, {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+              });
+              res.end(JSON.stringify({ success: true, outfit: saved }));
+            } catch (err) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+          });
+          return;
+        }
+
+        if (req.method === 'DELETE') {
+          const id = urlObj.searchParams.get('id');
+          if (!id) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'id parameter is required' }));
+            return;
+          }
+          const success = deleteOutfitFromD1AndR2(id);
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          });
+          res.end(JSON.stringify({ success }));
+          return;
+        }
+      }
+
+      // 3. DeepSeek V4.1 AI 프록시
       if (req.url.startsWith('/api/ai/deepseek')) {
         let body = '';
         req.on('data', (chunk) => (body += chunk));
@@ -85,6 +161,7 @@ config.server = {
         return;
       }
 
+      // 4. Flux Schnell 패션 화보 프록시
       if (req.url.startsWith('/api/ai/flux')) {
         let body = '';
         req.on('data', (chunk) => (body += chunk));
