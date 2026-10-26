@@ -1,0 +1,52 @@
+// Cloudflare Pages Function: /api/ai/flux
+export async function onRequestPost(context: any) {
+  try {
+    const request = context.request;
+    const body = await request.json();
+
+    const apiKey =
+      context.env?.EXPO_PUBLIC_HIVE_SECRET_KEY ||
+      context.env?.HIVE_SECRET_KEY ||
+      '';
+
+    const hiveResponse = await fetch('https://api-cdn.thehive.ai/api/v3/black-forest-labs/flux-schnell', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await hiveResponse.text();
+
+    return new Response(data, {
+      status: hiveResponse.status,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      },
+    });
+  } catch (err: any) {
+    return new Response(JSON.stringify({ error: err?.message || 'Serverless proxy error' }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  }
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    },
+  });
+}
