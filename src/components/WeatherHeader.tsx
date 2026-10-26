@@ -129,7 +129,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
               activeOpacity={0.8}
             >
               <Text style={[styles.genderText, gender === 'female' && styles.genderTextActive]}>
-                여 👩
+                여
               </Text>
             </TouchableOpacity>
 
@@ -139,7 +139,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
               activeOpacity={0.8}
             >
               <Text style={[styles.genderText, gender === 'male' && styles.genderTextActive]}>
-                남 👨
+                남
               </Text>
             </TouchableOpacity>
 
@@ -149,7 +149,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
               activeOpacity={0.8}
             >
               <Text style={[styles.genderText, gender === 'all' && styles.genderTextActive]}>
-                모두 👥
+                모두
               </Text>
             </TouchableOpacity>
           </View>

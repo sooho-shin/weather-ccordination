@@ -159,7 +159,7 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
           )}
 
           {errorMessage && (
-            <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
+            <Text style={styles.errorText}>{errorMessage}</Text>
           )}
 
           {/* 생성 버튼 */}

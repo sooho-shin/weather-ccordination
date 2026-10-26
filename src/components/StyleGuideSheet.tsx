@@ -98,7 +98,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             ))}
           </View>
 
-          {/* 버튼 그룹: 코디 셔플 🔀 & DeepSeek AI 실시간 추천 */}
+          {/* 버튼 그룹: 코디 셔플 및 AI 맞춤 추천 */}
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={styles.shuffleBtn}
