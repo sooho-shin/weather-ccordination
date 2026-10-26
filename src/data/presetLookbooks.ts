@@ -9,6 +9,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '한남동 미니멀 테일러드',
     styleDescription: '오버핏 모카 블레이저와 플루이드 와이드 슬랙스로 완성한 감각적인 29CM 룩',
     imageUrl: require('../../assets/lookbooks/female_trendy_22c_1.jpg'),
@@ -26,6 +28,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '프렌치 모던 트렌치',
     styleDescription: '래글런 맥 트렌치코트와 스트라이프 니트로 연출한 프렌치 시크',
     imageUrl: require('../../assets/lookbooks/female_trendy_22c_2.jpg'),
@@ -42,6 +46,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '소프트 데일리 가디건',
     styleDescription: '포근한 버터크림 알파카 가디건과 아이보리 코튼 팬츠의 톤온톤 조화',
     imageUrl: require('../../assets/lookbooks/female_trendy_22c_3.jpg'),
@@ -58,6 +64,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '시크 크롭 레더 자켓',
     styleDescription: '스탠드카라 비건 레더 자켓과 빈티지 와이드 진의 트렌디 믹스',
     imageUrl: require('../../assets/lookbooks/female_trendy_22c_4.jpg'),
@@ -74,6 +82,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '스포티 고프코어 시티룩',
     styleDescription: '세이지 배색 윈드브레이커와 파라슈트 카고 팬츠의 어반 스트릿',
     imageUrl: require('../../assets/lookbooks/female_trendy_22c_5.jpg'),
@@ -94,6 +104,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '어반 빈티지 레더 믹스',
     styleDescription: '워시드 카라 레더 블루종과 오트밀 니트로 완성한 감각적인 무신사 스트릿 룩',
     imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
@@ -110,6 +122,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '클래식 시티보이 맥코트',
     styleDescription: '세이지 맥코트와 화이트 팝린 셔츠로 연출한 단정하고 감각적인 시티보이 룩',
     imageUrl: require('../../assets/lookbooks/male_trendy_22c_2.jpg'),
@@ -126,6 +140,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '하프집업 니트 레이어드',
     styleDescription: '네이비 하프집업 스웨터와 크림 와이드 슬랙스로 연출한 깔끔한 남친룩',
     imageUrl: require('../../assets/lookbooks/male_trendy_22c_3.jpg'),
@@ -142,6 +158,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '모던 미니멀 셋업 블레이저',
     styleDescription: '드롭숄더 다크 차콜 블레이저와 와이드 팬츠로 완성한 컨템포러리 셋업',
     imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
@@ -158,6 +176,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '20to22',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '유틸리티 코튼 셔켓 캐주얼',
     styleDescription: '포켓 디테일의 코튼 오버셔츠와 데님을 매치한 편안한 데일리 룩',
     imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
@@ -178,6 +198,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '리조트 서머 린넨 셋업',
     styleDescription: '뜨거운 태양 아래 쾌적함을 유지하는 고급스러운 내추럴 린넨 탑 & 숏츠',
     imageUrl: 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&w=1080&q=85',
@@ -194,6 +216,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '내추럴 맥시 린넨 원피스',
     styleDescription: '바람이 잘 통하는 A라인 실루엣의 에크루 린넨 롱드레스 룩',
     imageUrl: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1080&q=85',
@@ -209,6 +233,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '쿨 시어 셔츠 & 버뮤다 룩',
     styleDescription: '은은한 시스루 셔츠와 와이드 버뮤다 팬츠로 연출한 도회적 시크',
     imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1080&q=85',
@@ -225,6 +251,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '서머 홀터 니트 & 플루이드 팬츠',
     styleDescription: '시원한 홀터넥 골지 니트와 차르르 흐르는 린넨 슬랙스의 올드머니 서머',
     imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1080&q=85',
@@ -240,6 +268,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '스포티 파라슈트 서머 스트릿',
     styleDescription: '쿨맥스 크롭 티셔츠와 경량 파라슈트 롱스커트의 트렌디 스트릿 믹스',
     imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
@@ -259,6 +289,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '클린 서머 린넨 & 버뮤다',
     styleDescription: '땀 흡수가 뛰어나고 시원한 린넨 셔츠와 단정한 버뮤다 반바지',
     imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1080&q=85',
@@ -274,6 +306,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '시티 서머 스트라이프 셔츠',
     styleDescription: '여유로운 핏의 시어서커 스트라이프 셔츠와 와이드 치노 쇼츠',
     imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
@@ -289,6 +323,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '헤비웨이트 박시티 & 유틸리티 쇼츠',
     styleDescription: '체형을 보정해주는 탄탄한 오버핏 반팔과 기능성 나일론 쇼츠의 조화',
     imageUrl: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1080&q=85',
@@ -304,6 +340,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '서머 카라 니트 & 린넨 트라우저',
     styleDescription: '고급스러운 피케 카라 니트와 긴 기장의 린넨 슬랙스로 연출한 단정한 룩',
     imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
@@ -319,6 +357,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'over28',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '어반 아웃도어 그래픽 캐주얼',
     styleDescription: '감각적인 백프린팅 티셔츠와 이지 웨이스트 밴딩 쇼츠의 스트릿 무드',
     imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1080&q=85',
@@ -338,6 +378,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '클래식 하운드투스 블레이저',
     styleDescription: '차가운 바람을 막아주는 탄탄한 하운드투스 체크 울 자켓과 모크넥 니트',
     imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1080&q=85',
@@ -354,6 +396,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '빈티지 레더 & 맥시 데님 스커트',
     styleDescription: '바이크 무드의 비건 레더 블루종과 슬릿 롱 데님 스커트의 시크 룩',
     imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
@@ -370,6 +414,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '헤비 램스울 집업 & 와이드 슬랙스',
     styleDescription: '두툼한 골지 투웨이 집업 카디건과 핀턱 와이드 슬랙스의 포근한 데일리',
     imageUrl: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=1080&q=85',
@@ -385,6 +431,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '스웨이드 크롭 바시티 & 치노',
     styleDescription: '클래식한 카멜 스웨이드 점퍼와 크림 와이드 코튼 팬츠의 웜 톤온톤',
     imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1080&q=85',
@@ -401,6 +449,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '다이아 퀼팅 자켓 & 코듀로이 룩',
     styleDescription: '가벼운 패딩 충전재의 다이아 퀼팅 자켓과 따뜻한 골덴 팬츠',
     imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1080&q=85',
@@ -420,6 +470,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '모던 워크웨어 필드 자켓',
     styleDescription: '간절기 든든하고 활동적인 카키 야상 자켓과 와플 니트 레이어드',
     imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
@@ -436,6 +488,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'office',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '클래식 해링턴 블루종 & 셀비지',
     styleDescription: '단정한 스탠드 카라 해링턴 자켓과 롤업 생지 데님의 클래식 캐주얼',
     imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
@@ -452,6 +506,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'daily',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '헤링본 울 트위드 자켓 & 터틀넥',
     styleDescription: '세련된 헤링본 패턴 블레이저와 블랙 모크넥으로 완성한 댄디 룩',
     imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
@@ -468,6 +524,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '오버핏 모헤어 니트 & 와이드 카고',
     styleDescription: '브러쉬드 모헤어 니트와 블랙 와이드 카고 슬랙스의 트렌디 스트릿',
     imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
@@ -483,6 +541,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '12to16',
     weatherState: 'Clear',
+    tpo: 'street',
+    weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '덕 캔버스 카펜터 자켓 캐주얼',
     styleDescription: '탄탄한 덕 캔버스 워크자켓과 그레이 후디를 매치한 시티 캐주얼',
     imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
@@ -503,6 +563,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'office',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '윈터 웜 구스다운 & 코듀로이',
     styleDescription: '눈 오는 한겨울 바람을 막아주는 프리미엄 롱 구스다운과 골덴 팬츠',
     imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1080&q=85',
@@ -519,6 +581,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'office',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '오버사이즈 시어링 롱무스탕',
     styleDescription: '풍성한 양털 시어링 안감의 롱 무스탕 코트와 부츠컷 팬츠의 글램 룩',
     imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1080&q=85',
@@ -535,6 +599,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'daily',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '글로시 숏 푸퍼 & 후드 셋업',
     styleDescription: '트렌디한 유광 크롭 다운 자켓과 기모 조거팬츠의 영앤트렌디 룩',
     imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
@@ -551,6 +617,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'street',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '캐시미어 더블 롱코트 & 머플러',
     styleDescription: '우아한 카멜 캐시미어 코트에 풍성한 울 머플러를 두른 올드머니 윈터',
     imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1080&q=85',
@@ -568,6 +636,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'street',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '테크니컬 다운 아노락 & 웜 조거',
     styleDescription: '영하의 눈보라 속에서도 완벽한 방풍 발수 아노락 패딩 스타일',
     imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
@@ -587,6 +657,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'office',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '헤비 윈터 다운 파카',
     styleDescription: '영하의 추위와 눈보라에도 끄떡없는 헤비 덕다운 파카와 기모 카고',
     imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1080&q=85',
@@ -603,6 +675,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'office',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '클래식 발마칸 울 롱코트',
     styleDescription: '두툼한 이중지 울 원사의 싱글 래글런 발마칸 코트와 캐시미어 니트',
     imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
@@ -619,6 +693,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'daily',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '밀리터리 몬스터 다운 파카',
     styleDescription: '레벨7 몬스터 파카 기반 오버핏 다운과 스웨트 셋업의 어반 밀리터리',
     imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
@@ -635,6 +711,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'street',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '빈티지 레더 무스탕 자켓',
     styleDescription: '두터운 양털 카라의 브라운 레더 무스탕과 묵직한 생지 데님 룩',
     imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
@@ -651,6 +729,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: 'under4',
     weatherState: 'Snow',
+    tpo: 'street',
+    weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '미니멀 숏 푸퍼 & 골덴 팬츠',
     styleDescription: '군더더기 없는 블랙 유광 숏패딩과 브라운 코듀로이 턱팬츠의 캐주얼',
     imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
@@ -671,6 +751,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'office',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '레인 프로텍션 윈드브레이커',
     styleDescription: '빗방울을 튕겨내는 발수 윈드브레이커와 감각적인 첼시 레인부츠',
     imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=1080&q=85',
@@ -687,6 +769,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'office',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '방수 코팅 싱글 레인 트렌치',
     styleDescription: '테플론 발수 가공된 싱글 트렌치코트와 크롭 데님의 프렌치 레인 룩',
     imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
@@ -703,6 +787,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'daily',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '오버핏 하프집 아노락 & 쇼츠',
     styleDescription: '스포티한 방풍 나일론 아노락과 퀵드라이 쇼츠, 롱 레인부츠의 믹스매치',
     imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
@@ -718,6 +804,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'street',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '후디드 롱 레인파카 & 조거',
     styleDescription: '무릎까지 덮어주는 방수 후드 파카와 조거팬츠로 완성한 편안한 출근룩',
     imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1080&q=85',
@@ -734,6 +822,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'female',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'street',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '테크니컬 고프코어 쉘 & 파라슈트',
     styleDescription: '투습 방수 3레이어 쉘 자켓과 나일론 파라슈트 팬츠의 어반 테크웨어',
     imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1080&q=85',
@@ -753,6 +843,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'office',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '어반 고어텍스 쉘자켓 코디',
     styleDescription: '우천 시 쾌적한 출퇴근을 위한 투습 방수 하이엔드 쉘자켓과 발수 조거',
     imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
@@ -769,6 +861,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'office',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '비즈니스 발수 싱글 맥코트',
     styleDescription: '비에 젖지 않는 방수 코팅 원사의 네이비 맥코트와 옥스포드 셔츠 룩',
     imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
@@ -785,6 +879,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'daily',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '테크 아노락 & 유틸리티 쇼츠',
     styleDescription: '하프집업 발수 아노락과 무릎 위 숏팬츠, 워터프루프 부츠의 쿨 캐주얼',
     imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
@@ -800,6 +896,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'street',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '후디드 윈드쉘 & 와이드 치노',
     styleDescription: '가볍게 걸치기 좋은 라이트 윈드쉘과 롤업 와이드 팬츠의 시티 데일리',
     imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
@@ -816,6 +914,8 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     gender: 'male',
     tempBand: '17to19',
     weatherState: 'Rain',
+    tpo: 'street',
+    weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '셔츠형 레인 자켓 & 테크 팬츠',
     styleDescription: '스냅 버튼의 오버핏 셔켓과 발수 카고 팬츠로 연출한 모던 테크 룩',
     imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
@@ -830,60 +930,62 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
 ];
 
 /**
- * 주어진 날씨/기온대/성별에 가장 적합한 룩북 목록(최소 5개 보장)을 찾아 반환
+ * 주어진 날씨/기온대/성별/TPO에 가장 적합한 룩북 목록을 찾아 반환
  */
 export function findMatchingLookbooks(
-  gender: 'female' | 'male',
+  gender: 'female' | 'male' | 'all',
   tempBand: string,
-  weatherState: string
+  weatherState: string,
+  tpo?: 'office' | 'daily' | 'street'
 ): OutfitLookbook[] {
-  // 1차: 성별 + 날씨상태(비/눈일 때) 우선 필터
+  // 1. 성별 풀 필터 (all이면 남/여 모두 포함)
+  let pool = gender === 'all'
+    ? PRESET_LOOKBOOKS
+    : PRESET_LOOKBOOKS.filter((b) => b.gender === gender);
+
+  // 2. 비 또는 눈 올 때 우선 매칭
   if (weatherState === 'Rain' || weatherState === 'Snow') {
-    const weatherMatches = PRESET_LOOKBOOKS.filter(
-      (b) => b.gender === gender && b.weatherState === weatherState
-    );
-    if (weatherMatches.length >= 5) return weatherMatches.slice(0, 5);
-    if (weatherMatches.length > 0) {
-      const fallback = PRESET_LOOKBOOKS.filter(
-        (b) => b.gender === gender && !weatherMatches.includes(b)
-      );
-      return [...weatherMatches, ...fallback].slice(0, 5);
+    const weatherPool = pool.filter((b) => b.weatherState === weatherState);
+    if (weatherPool.length > 0) {
+      if (tpo) {
+        const tpoMatches = weatherPool.filter((b) => b.tpo === tpo);
+        if (tpoMatches.length > 0) return tpoMatches;
+      }
+      return weatherPool;
     }
   }
 
-  // 2차: 성별 + 기온대 일치
-  const bandMatches = PRESET_LOOKBOOKS.filter(
-    (b) => b.gender === gender && b.tempBand === tempBand
-  );
-  if (bandMatches.length >= 5) return bandMatches.slice(0, 5);
-  if (bandMatches.length > 0) {
-    const fallback = PRESET_LOOKBOOKS.filter(
-      (b) => b.gender === gender && !bandMatches.includes(b)
-    );
-    return [...bandMatches, ...fallback].slice(0, 5);
+  // 3. 기온대 일치 필터
+  const bandPool = pool.filter((b) => b.tempBand === tempBand);
+  if (bandPool.length > 0) {
+    if (tpo) {
+      const tpoMatches = bandPool.filter((b) => b.tpo === tpo);
+      if (tpoMatches.length > 0) return tpoMatches;
+    }
+    return bandPool;
   }
 
-  // 3차: 기온대 매핑이 직접 없는 중간 기온대(23to27, 17to19, 9to11, 5to8 등) 인접 기온대 매칭
+  // 4. 인접 기온대 매칭
   let targetBand = '20to22';
   if (tempBand === 'over28' || tempBand === '23to27') targetBand = 'over28';
   else if (tempBand === '20to22' || tempBand === '17to19') targetBand = '20to22';
   else if (tempBand === '12to16' || tempBand === '9to11') targetBand = '12to16';
   else if (tempBand === '5to8' || tempBand === 'under4') targetBand = 'under4';
 
-  const neighborMatches = PRESET_LOOKBOOKS.filter(
-    (b) => b.gender === gender && b.tempBand === targetBand
-  );
-  if (neighborMatches.length >= 5) return neighborMatches.slice(0, 5);
-  if (neighborMatches.length > 0) {
-    const fallback = PRESET_LOOKBOOKS.filter(
-      (b) => b.gender === gender && !neighborMatches.includes(b)
-    );
-    return [...neighborMatches, ...fallback].slice(0, 5);
+  const neighborPool = pool.filter((b) => b.tempBand === targetBand);
+  if (neighborPool.length > 0) {
+    if (tpo) {
+      const tpoMatches = neighborPool.filter((b) => b.tpo === tpo);
+      if (tpoMatches.length > 0) return tpoMatches;
+    }
+    return neighborPool;
   }
 
-  // 4차: 성별 일치 기본 룩북 (최소 5개 슬라이스)
-  const genderMatches = PRESET_LOOKBOOKS.filter((b) => b.gender === gender);
-  if (genderMatches.length >= 5) return genderMatches.slice(0, 5);
+  // 5. TPO 일치 룩북
+  if (tpo) {
+    const tpoMatches = pool.filter((b) => b.tpo === tpo);
+    if (tpoMatches.length > 0) return tpoMatches;
+  }
 
-  return PRESET_LOOKBOOKS.slice(0, 5);
+  return pool.length > 0 ? pool : PRESET_LOOKBOOKS.slice(0, 5);
 }

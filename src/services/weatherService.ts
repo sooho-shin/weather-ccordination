@@ -1,23 +1,40 @@
 import { WeatherData, WeatherState } from '../types/weather';
 
 /**
+ * 기온 및 날씨 상태 기반 직관적 체감 키워드 산출
+ */
+export function getApparentWeatherKeywords(
+  temperature: number,
+  weatherState: WeatherState
+): {
+  apparentKeyword: string;
+  weatherStateKeyword: string;
+} {
+  let apparentKeyword = '선선하다';
+  if (temperature >= 28) apparentKeyword = '덥다';
+  else if (temperature >= 23) apparentKeyword = '따뜻하다';
+  else if (temperature >= 20) apparentKeyword = '선선하다';
+  else if (temperature >= 17) apparentKeyword = '약간 쌀쌀';
+  else if (temperature >= 12) apparentKeyword = '쌀쌀하다';
+  else if (temperature >= 9) apparentKeyword = '꽤 쌀쌀';
+  else if (temperature >= 5) apparentKeyword = '춥다';
+  else apparentKeyword = '매우 춥다';
+
+  let weatherStateKeyword = '맑음';
+  if (weatherState === 'Rain') weatherStateKeyword = '비온다';
+  else if (weatherState === 'Snow') weatherStateKeyword = '눈온다';
+  else if (weatherState === 'Clouds') weatherStateKeyword = '흐리다';
+
+  return { apparentKeyword, weatherStateKeyword };
+}
+
+/**
  * WMO 날씨 코드를 WeatherState 및 한글 설명으로 변환
  */
 export function mapWmoCodeToWeatherState(code: number): {
   state: WeatherState;
   description: string;
 } {
-  // WMO Weather interpretation codes (WW)
-  // 0: Clear sky
-  // 1, 2, 3: Mainly clear, partly cloudy, and overcast
-  // 45, 48: Fog
-  // 51, 53, 55: Drizzle
-  // 61, 63, 65: Rain
-  // 71, 73, 75: Snow fall
-  // 77: Snow grains
-  // 80, 81, 82: Rain showers
-  // 85, 86: Snow showers
-  // 95, 96, 99: Thunderstorm
   if (code === 0) return { state: 'Clear', description: '맑음' };
   if (code === 1) return { state: 'Clear', description: '대체로 맑음' };
   if (code === 2) return { state: 'Clouds', description: '구름 조금' };
@@ -33,14 +50,14 @@ export function mapWmoCodeToWeatherState(code: number): {
 }
 
 /**
- * Open-Meteo 실시간 날씨 데이터 호출 (무료, API 키 불필요)
+ * Open-Meteo 실시간 날씨 데이터 호출 (최고/최저 기온 및 체감 뱃지 지원)
  */
 export async function fetchCurrentWeather(
   latitude: number,
   longitude: number,
   locationName: string
 ): Promise<WeatherData> {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,precipitation,wind_speed_10m&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,precipitation,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
 
   try {
     const controller = new AbortController();
@@ -55,11 +72,21 @@ export async function fetchCurrentWeather(
 
     const data = await response.json();
     const current = data.current;
+    const daily = data.daily;
 
     const { state, description } = mapWmoCodeToWeatherState(current.weather_code);
+    const temp = Math.round(current.temperature_2m);
+    const tempMax = daily?.temperature_2m_max?.[0] !== undefined ? Math.round(daily.temperature_2m_max[0]) : temp + 3;
+    const tempMin = daily?.temperature_2m_min?.[0] !== undefined ? Math.round(daily.temperature_2m_min[0]) : temp - 4;
+
+    const { apparentKeyword, weatherStateKeyword } = getApparentWeatherKeywords(temp, state);
 
     return {
-      temperature: Math.round(current.temperature_2m),
+      temperature: temp,
+      tempMax,
+      tempMin,
+      apparentKeyword,
+      weatherStateKeyword,
       weatherState: state,
       weatherDescription: description,
       precipitation: current.precipitation ?? 0,
@@ -68,8 +95,13 @@ export async function fetchCurrentWeather(
     };
   } catch (error) {
     console.warn('날씨 API 호출 실패 또는 타임아웃, 기본 22도 맑음 날씨로 폴백:', error);
+    const { apparentKeyword, weatherStateKeyword } = getApparentWeatherKeywords(22, 'Clear');
     return {
       temperature: 22,
+      tempMax: 25,
+      tempMin: 16,
+      apparentKeyword,
+      weatherStateKeyword,
       weatherState: 'Clear',
       weatherDescription: '맑음',
       precipitation: 0,

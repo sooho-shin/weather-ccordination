@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { defaultImageGenerationService } from '../services/ai/envImageGenerationService';
+import { generateOotdWithDeepSeek, isDeepSeekConfigured } from '../services/ai/deepseekService';
 import { Gender, WeatherData } from '../types/weather';
 import { OutfitLookbook } from '../types/outfit';
 
@@ -48,6 +49,35 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
     setErrorMessage(null);
 
     try {
+      // 1. DeepSeek API가 설정되어 있는 경우 지능형 코디 엔진 우선 시도
+      if (isDeepSeekConfigured()) {
+        const dsResult = await generateOotdWithDeepSeek(
+          weather,
+          selectedMood === '클래식 포멀' ? 'office' : selectedMood === '시크 스트릿' ? 'street' : 'daily',
+          gender
+        );
+
+        if (dsResult.success && dsResult.items && dsResult.items.length > 0) {
+          const aiLookbook: OutfitLookbook = {
+            id: `ai_deepseek_${Date.now()}`,
+            gender,
+            tempBand: '20to22',
+            weatherState: weather.weatherState,
+            styleTitle: dsResult.styleTitle || `${selectedMood} 맞춤 코디`,
+            styleDescription: dsResult.styleDescription || 'DeepSeek가 추천하는 오늘 날씨 최적의 착장',
+            weatherDefenseTags: dsResult.weatherDefenseTags,
+            imageUrl: require('../../assets/lookbooks/female_trendy_22c_1.jpg'),
+            items: dsResult.items,
+            imageSource: 'ai',
+            generatedAt: new Date().toISOString(),
+          };
+          onGenerationSuccess(aiLookbook);
+          onClose();
+          return;
+        }
+      }
+
+      // 2. 기본 이미지 생성 서비스 호출 (OpenAI / Fal / Mock 안전 폴백)
       const result = await defaultImageGenerationService.generateOutfit({
         gender,
         temperature: weather.temperature,

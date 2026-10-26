@@ -4,25 +4,31 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 
 import { Gender, WeatherData, WeatherState } from './src/types/weather';
-import { OutfitLookbook } from './src/types/outfit';
+import { OutfitLookbook, TpoCategory } from './src/types/outfit';
 import { getTemperatureBand } from './src/constants/temperatureBands';
 import { findMatchingLookbooks } from './src/data/presetLookbooks';
-import { getCurrentLocation, DEFAULT_FALLBACK_LOCATION } from './src/services/locationService';
+import { getCurrentLocation } from './src/services/locationService';
 import { fetchCurrentWeather } from './src/services/weatherService';
 
 import { FullscreenBackground } from './src/components/FullscreenBackground';
 import { WeatherHeader } from './src/components/WeatherHeader';
+import { TpoTabBar } from './src/components/TpoTabBar';
 import { StyleGuideSheet } from './src/components/StyleGuideSheet';
 import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
 
 export default function App() {
-  // 1. 상태 관리: 성별, 날씨, 현재 선택된 룩북 인덱스, 모달 가시성
+  // 1. 상태 관리: 성별(여/남/모두), TPO 탭(출근/데일리/스트릿), 날씨, 슬라이드 인덱스
   const [gender, setGender] = useState<Gender>('female');
+  const [selectedTpo, setSelectedTpo] = useState<TpoCategory>('office');
 
-  // 기본 즉시 렌더링을 위한 22° 맑음 초기값 (0초 로딩 보장)
+  // 기본 즉시 렌더링용 22° 맑음 초기값 (체감 키워드 및 최고/최저 기온 포함)
   const [weather, setWeather] = useState<WeatherData>({
     temperature: 22,
+    tempMax: 25,
+    tempMin: 16,
+    apparentKeyword: '선선하다',
+    weatherStateKeyword: '맑음',
     weatherState: 'Clear',
     weatherDescription: '맑음',
     precipitation: 0,
@@ -36,7 +42,7 @@ export default function App() {
   const [simulatorVisible, setSimulatorVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
 
-  // 2. 실시간 GPS 위치 및 실제 날씨 비동기 로딩 (백그라운드에서 부드럽게 업데이트)
+  // 2. 실시간 GPS 위치 및 실제 날씨 비동기 로딩
   const loadRealWeather = useCallback(async () => {
     try {
       const loc = await getCurrentLocation();
@@ -51,27 +57,44 @@ export default function App() {
     loadRealWeather();
   }, [loadRealWeather]);
 
-  // 3. 현재 기온대 및 성별에 매칭되는 룩북 목록 계산
+  // 3. 현재 기온대 및 성별, TPO에 매칭되는 룩북 목록 계산
   const currentTempBand = useMemo(
     () => getTemperatureBand(weather.temperature).id,
     [weather.temperature]
   );
 
   const availableLookbooks = useMemo(() => {
-    const presets = findMatchingLookbooks(gender, currentTempBand, weather.weatherState);
-    if (aiCustomLookbook && aiCustomLookbook.gender === gender) {
-      return [aiCustomLookbook, ...presets];
+    const presets = findMatchingLookbooks(
+      gender,
+      currentTempBand,
+      weather.weatherState,
+      selectedTpo
+    );
+
+    // 사용자가 커스텀 생성한 AI 룩북이 있을 때 현재 TPO나 성별 조건과 부합하면 맨 앞 배치
+    if (aiCustomLookbook) {
+      const isGenderMatch = gender === 'all' || aiCustomLookbook.gender === gender;
+      const isTpoMatch = !aiCustomLookbook.tpo || aiCustomLookbook.tpo === selectedTpo;
+      if (isGenderMatch && isTpoMatch) {
+        return [aiCustomLookbook, ...presets];
+      }
     }
     return presets;
-  }, [gender, currentTempBand, weather.weatherState, aiCustomLookbook]);
+  }, [gender, currentTempBand, weather.weatherState, selectedTpo, aiCustomLookbook]);
 
   // 슬라이드 인덱스 범위 초과 방지
   const safeIndex = activeSlideIndex >= availableLookbooks.length ? 0 : activeSlideIndex;
   const currentLookbook = availableLookbooks[safeIndex] || availableLookbooks[0];
 
-  // 성별 전환 핸들러
-  const handleToggleGender = () => {
-    setGender((prev) => (prev === 'female' ? 'male' : 'female'));
+  // 성별 변경 핸들러
+  const handleSelectGender = (newGender: Gender) => {
+    setGender(newGender);
+    setActiveSlideIndex(0);
+  };
+
+  // TPO 탭 변경 핸들러
+  const handleSelectTpo = (newTpo: TpoCategory) => {
+    setSelectedTpo(newTpo);
     setActiveSlideIndex(0);
   };
 
@@ -81,9 +104,28 @@ export default function App() {
     state: WeatherState,
     description: string
   ) => {
+    let apparentKeyword = '선선하다';
+    if (temp >= 28) apparentKeyword = '덥다';
+    else if (temp >= 23) apparentKeyword = '따뜻하다';
+    else if (temp >= 20) apparentKeyword = '선선하다';
+    else if (temp >= 17) apparentKeyword = '약간 쌀쌀';
+    else if (temp >= 12) apparentKeyword = '쌀쌀하다';
+    else if (temp >= 9) apparentKeyword = '꽤 쌀쌀';
+    else if (temp >= 5) apparentKeyword = '춥다';
+    else apparentKeyword = '매우 춥다';
+
+    let weatherStateKeyword = '맑음';
+    if (state === 'Rain') weatherStateKeyword = '비온다';
+    else if (state === 'Snow') weatherStateKeyword = '눈온다';
+    else if (state === 'Clouds') weatherStateKeyword = '흐리다';
+
     setWeather((prev) => ({
       ...prev,
       temperature: temp,
+      tempMax: temp + 3,
+      tempMin: temp - 4,
+      apparentKeyword,
+      weatherStateKeyword,
       weatherState: state,
       weatherDescription: description,
       isSimulated: true,
@@ -91,7 +133,18 @@ export default function App() {
     setActiveSlideIndex(0);
   };
 
-  // 다음/이전 룩북 순환 핸들러 (5대 스타일 순환)
+  // 코디 셔플 핸들러 (기획서 핵심 UX: 랜덤 착장 전환)
+  const handleShuffleLookbook = useCallback(() => {
+    if (availableLookbooks.length <= 1) return;
+    setActiveSlideIndex((prev) => {
+      let nextIndex = Math.floor(Math.random() * availableLookbooks.length);
+      if (nextIndex === prev) {
+        nextIndex = (prev + 1) % availableLookbooks.length;
+      }
+      return nextIndex;
+    });
+  }, [availableLookbooks.length]);
+
   const handleNextLookbook = useCallback(() => {
     setActiveSlideIndex((prev) => (prev + 1) % availableLookbooks.length);
   }, [availableLookbooks.length]);
@@ -100,10 +153,6 @@ export default function App() {
     setActiveSlideIndex(
       (prev) => (prev - 1 + availableLookbooks.length) % availableLookbooks.length
     );
-  }, [availableLookbooks.length]);
-
-  const handleRefreshLookbook = useCallback(() => {
-    setActiveSlideIndex((prev) => (prev + 1) % availableLookbooks.length);
   }, [availableLookbooks.length]);
 
   // 웹 브라우저 환경에서 좌우 방향키로 룩북 넘기기 지원
@@ -138,15 +187,22 @@ export default function App() {
 
       {/* 2. 안전 영역 내 오버레이 UI */}
       <SafeAreaView style={styles.safeArea}>
-        {/* 상단 날씨 정보 및 성별 토글 헤더 */}
-        <WeatherHeader
-          weather={weather}
-          gender={gender}
-          onToggleGender={handleToggleGender}
-          onOpenSimulator={() => setSimulatorVisible(true)}
-          onOpenAIGenerator={() => setAiModalVisible(true)}
-          onRefreshLookbook={handleRefreshLookbook}
-        />
+        {/* 상단: dize. 브랜딩, 체감 뱃지, 최고/최저 기온, 성별 토글 */}
+        <View>
+          <WeatherHeader
+            weather={weather}
+            gender={gender}
+            onSelectGender={handleSelectGender}
+            onOpenSimulator={() => setSimulatorVisible(true)}
+            onOpenAIGenerator={() => setAiModalVisible(true)}
+          />
+
+          {/* 중앙 상단: TPO 3분할 탭 바 ([ 출근/단정 ] [ 데일리/캐주얼 ] [ 스트릿/힙 ]) */}
+          <TpoTabBar
+            selectedTpo={selectedTpo}
+            onSelectTpo={handleSelectTpo}
+          />
+        </View>
 
         {/* 좌우 코디 넘기기 플로팅 버튼 */}
         <View style={styles.sideNavRow} pointerEvents="box-none">
@@ -154,28 +210,31 @@ export default function App() {
             style={styles.navChevronBtn}
             onPress={handlePrevLookbook}
             activeOpacity={0.7}
+            accessibilityLabel="이전 코디"
           >
-            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+            <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.navChevronBtn}
             onPress={handleNextLookbook}
             activeOpacity={0.7}
+            accessibilityLabel="다음 코디"
           >
-            <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
+            <Ionicons name="chevron-forward" size={22} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
-        {/* 하단 글래스모피즘 코디 가이드 시트 */}
+        {/* 하단: 글래스모피즘 코디 가이드 시트 (날씨 방어 태그 + 셔플 버튼 + 세부 아이템 칩) */}
         {currentLookbook && (
           <StyleGuideSheet
             lookbook={currentLookbook}
             currentIndex={safeIndex}
             totalCount={availableLookbooks.length}
             onSelectIndex={(index) => setActiveSlideIndex(index)}
-            onNextLookbook={handleNextLookbook}
+            onShuffle={handleShuffleLookbook}
             onOpenAIGenerator={() => setAiModalVisible(true)}
+            isAiGenerated={currentLookbook.imageSource === 'ai'}
           />
         )}
       </SafeAreaView>
@@ -192,7 +251,7 @@ export default function App() {
       <AIGenerationModal
         visible={aiModalVisible}
         weather={weather}
-        gender={gender}
+        gender={gender === 'all' ? 'female' : gender}
         onClose={() => setAiModalVisible(false)}
         onGenerationSuccess={handleGenerationSuccess}
       />
@@ -211,7 +270,7 @@ const styles = StyleSheet.create({
   },
   sideNavRow: {
     position: 'absolute',
-    top: '48%',
+    top: '49%',
     left: 12,
     right: 12,
     flexDirection: 'row',
@@ -219,13 +278,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   navChevronBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.38)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderColor: 'rgba(255, 255, 255, 0.22)',
   },
 });

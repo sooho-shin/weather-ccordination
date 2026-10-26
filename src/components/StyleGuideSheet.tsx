@@ -17,8 +17,9 @@ interface StyleGuideSheetProps {
   currentIndex: number;
   totalCount: number;
   onSelectIndex: (index: number) => void;
-  onNextLookbook: () => void;
+  onShuffle: () => void;
   onOpenAIGenerator: () => void;
+  isAiGenerated?: boolean;
 }
 
 export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
@@ -26,23 +27,46 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   currentIndex,
   totalCount,
   onSelectIndex,
-  onNextLookbook,
+  onShuffle,
   onOpenAIGenerator,
+  isAiGenerated = false,
 }) => {
+  const defenseTags = lookbook.weatherDefenseTags || ['#오늘의_OOTD', '#날씨맞춤'];
+
   return (
     <View style={styles.wrapper}>
-      <BlurView intensity={70} tint="light" style={styles.blurContainer}>
-        {/* 상단 탭 헤더 */}
+      <BlurView intensity={75} tint="light" style={styles.blurContainer}>
+        {/* 1. 상단 헤더: 스타일 타이틀 및 설명 */}
         <View style={styles.header}>
-          <View style={styles.styleGuideBadge}>
-            <Text style={styles.styleGuideText}>STYLE GUIDE ({currentIndex + 1}/{totalCount})</Text>
-            <Ionicons name="chevron-down" size={14} color="#6C6C70" style={{ marginLeft: 2 }} />
+          <View style={styles.topBadgeRow}>
+            <View style={styles.guideBadge}>
+              <Text style={styles.guideBadgeText}>
+                OOTD Curation ({currentIndex + 1}/{totalCount})
+              </Text>
+            </View>
+            {isAiGenerated && (
+              <View style={styles.aiBadge}>
+                <Ionicons name="sparkles" size={10} color="#FF9500" />
+                <Text style={styles.aiBadgeText}>DeepSeek AI</Text>
+              </View>
+            )}
           </View>
-          <Text style={styles.title}>오늘의 코디 추천</Text>
-          <Text style={styles.styleSubtitle}>{lookbook.styleTitle}</Text>
+          <Text style={styles.title}>{lookbook.styleTitle}</Text>
+          <Text style={styles.subtitle} numberOfLines={2}>
+            {lookbook.styleDescription}
+          </Text>
         </View>
 
-        {/* 코디 세부 아이템 가로 스크롤 리스트 */}
+        {/* 2. 날씨 방어 태그 영역 (기획서 핵심: #우산_필수, #밝은바지_금지 등) */}
+        <View style={styles.defenseTagsRow}>
+          {defenseTags.map((tag, idx) => (
+            <View key={idx} style={styles.tagChip}>
+              <Text style={styles.tagText}>{tag}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* 3. 코디 세부 아이템 가로 스크롤 카드 */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -53,7 +77,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
           ))}
         </ScrollView>
 
-        {/* 하단 페이징 인디케이터 및 액션 */}
+        {/* 4. 하단 셔플 및 AI 버튼 액션 영역 */}
         <View style={styles.footer}>
           {/* 페이징 인디케이터 도트 */}
           <View style={styles.paginationDots}>
@@ -69,15 +93,15 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             ))}
           </View>
 
-          {/* 버튼 그룹: 다음 스타일 새로고침 & AI 모달 */}
+          {/* 버튼 그룹: 코디 셔플 🔀 & AI 맞춤 */}
           <View style={styles.buttonGroup}>
             <TouchableOpacity
-              style={styles.nextStyleBtn}
-              onPress={onNextLookbook}
+              style={styles.shuffleBtn}
+              onPress={onShuffle}
               activeOpacity={0.8}
             >
-              <Ionicons name="refresh" size={13} color="#000000" />
-              <Text style={styles.nextStyleBtnText}>다음 코디</Text>
+              <Ionicons name="shuffle" size={14} color="#000000" />
+              <Text style={styles.shuffleBtnText}>코디 셔플</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -101,58 +125,101 @@ const styles = StyleSheet.create({
     bottom: Platform.OS === 'ios' ? 24 : 16,
     left: 16,
     right: 16,
-    borderRadius: 32,
+    borderRadius: 30,
     overflow: 'hidden',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.15,
-        shadowRadius: 20,
+        shadowOpacity: 0.16,
+        shadowRadius: 22,
       },
       android: {
         elevation: 6,
       },
       web: {
-        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.15)',
+        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.16)',
       } as any,
     }),
   },
   blurContainer: {
     backgroundColor:
-      Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.45)' : 'rgba(255, 255, 255, 0.88)',
+      Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.48)' : 'rgba(255, 255, 255, 0.90)',
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.65)',
-    borderRadius: 32,
+    borderRadius: 30,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
-  styleGuideBadge: {
+  topBadgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
+    gap: 6,
+    marginBottom: 3,
   },
-  styleGuideText: {
-    fontSize: 11,
+  guideBadge: {
+    backgroundColor: 'rgba(0, 0, 0, 0.06)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  guideBadgeText: {
+    fontSize: 10.5,
     fontWeight: '700',
-    color: '#48484A',
-    letterSpacing: 0.8,
+    color: '#3C3C43',
+    letterSpacing: 0.5,
+  },
+  aiBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255, 149, 0, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  aiBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#D97706',
   },
   title: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: '#000000',
     letterSpacing: -0.3,
   },
-  styleSubtitle: {
-    fontSize: 12.5,
+  subtitle: {
+    fontSize: 12,
     color: '#3C3C43',
-    fontWeight: '600',
+    fontWeight: '500',
     marginTop: 2,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  defenseTagsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginVertical: 6,
+  },
+  tagChip: {
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 0.5,
+    borderColor: 'rgba(0, 0, 0, 0.12)',
+  },
+  tagText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#1C1C1E',
   },
   scrollList: {
     paddingVertical: 6,
@@ -160,26 +227,28 @@ const styles = StyleSheet.create({
   },
   footer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 10,
-    paddingHorizontal: 8,
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.06)',
   },
   paginationDots: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   dot: {
-    height: 7,
-    borderRadius: 3.5,
-    marginRight: 6,
+    height: 6,
+    borderRadius: 3,
   },
   activeDot: {
-    width: 20,
+    width: 16,
     backgroundColor: '#000000',
   },
   inactiveDot: {
-    width: 7,
+    width: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.22)',
   },
   buttonGroup: {
@@ -187,7 +256,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  nextStyleBtn: {
+  shuffleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+      } as any,
+    }),
+  },
+  shuffleBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#000000',
+  },
+  aiButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
@@ -196,27 +293,25 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     gap: 4,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
-  },
-  nextStyleBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  aiButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderColor: 'rgba(255, 149, 0, 0.3)',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+      web: {
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
+      } as any,
+    }),
   },
   aiButtonLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#000000',
+    color: '#FF9500',
   },
 });

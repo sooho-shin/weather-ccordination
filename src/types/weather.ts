@@ -10,7 +10,7 @@ export type TemperatureBandId =
   | '5to8'
   | 'under4';
 
-export type Gender = 'female' | 'male';
+export type Gender = 'female' | 'male' | 'all';
 
 export interface LocationData {
   latitude: number;
@@ -20,6 +20,10 @@ export interface LocationData {
 
 export interface WeatherData {
   temperature: number;
+  tempMax?: number;
+  tempMin?: number;
+  apparentKeyword?: string;
+  weatherStateKeyword?: string;
   weatherState: WeatherState;
   weatherDescription: string;
   precipitation: number;
