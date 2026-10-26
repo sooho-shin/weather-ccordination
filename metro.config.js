@@ -9,12 +9,17 @@ const {
 
 const config = getDefaultConfig(__dirname);
 
-const HIVE_SECRET_KEY = process.env.EXPO_PUBLIC_HIVE_SECRET_KEY || '';
+const HIVE_SECRET_KEY = process.env.HIVE_SECRET_KEY;
 
 /**
  * TheHive API 프록시 헬퍼 함수
  */
 function proxyHiveRequest(targetUrl, reqBody, clientRes) {
+  if (!HIVE_SECRET_KEY) {
+    clientRes.writeHead(503, { 'Content-Type': 'application/json' });
+    clientRes.end(JSON.stringify({ error: 'HIVE_SECRET_KEY is not configured' }));
+    return;
+  }
   const url = new URL(targetUrl);
   const data = JSON.stringify(reqBody);
 

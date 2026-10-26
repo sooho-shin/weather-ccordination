@@ -15,16 +15,11 @@ export async function generateFashionImageWithFlux(
   prompt: string,
   timeoutMs = 28000
 ): Promise<FluxGenerationResult> {
-  const apiKey =
-    process.env.EXPO_PUBLIC_HIVE_SECRET_KEY ||
-    process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY ||
-    '';
-
-  // 웹 브라우저 환경에서는 CORS 우회를 위해 프록시 엔드포인트(/api/ai/flux) 우선 사용
-  const endpoint =
-    Platform.OS === 'web' && typeof window !== 'undefined'
-      ? '/api/ai/flux'
-      : 'https://api-cdn.thehive.ai/api/v3/black-forest-labs/flux-schnell';
+  // Native clients must use an authenticated backend integration; never ship a Hive key.
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    return { success: false, errorMessage: 'AI 생성은 현재 웹에서만 지원됩니다.' };
+  }
+  const endpoint = '/api/ai/flux';
 
   try {
     const controller = new AbortController();
@@ -33,9 +28,6 @@ export async function generateFashionImageWithFlux(
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (endpoint.startsWith('http')) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
 
     // 마스터 전신 구도 표준 결합 (얼굴 확대 방지, 하반신/신발 100% 노출 강제)
     const standardizedPrompt = `${MASTER_FULLBODY_PROMPT_DIRECTIVE} Outfit details: ${prompt}`;

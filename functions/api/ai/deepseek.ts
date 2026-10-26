@@ -4,10 +4,13 @@ export async function onRequestPost(context: any) {
     const request = context.request;
     const body = await request.json();
 
-    const apiKey =
-      context.env?.EXPO_PUBLIC_HIVE_SECRET_KEY ||
-      context.env?.HIVE_SECRET_KEY ||
-      '';
+    const apiKey = context.env?.HIVE_SECRET_KEY;
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: 'HIVE_SECRET_KEY is not configured' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+    }
 
     const hiveResponse = await fetch('https://api-cdn.thehive.ai/api/v3/chat/completions', {
       method: 'POST',

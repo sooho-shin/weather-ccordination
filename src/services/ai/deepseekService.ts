@@ -20,48 +20,15 @@ export interface DeepSeekOotdResult {
  * TheHive.ai / DeepSeek API 환경설정 조회
  */
 export function getDeepSeekConfig() {
-  let customKey = '';
-  if (typeof window !== 'undefined' && window.localStorage) {
-    customKey = window.localStorage.getItem('dize_hive_secret_key') || '';
-  }
-
-  const apiKey =
-    customKey ||
-    process.env.EXPO_PUBLIC_HIVE_SECRET_KEY ||
-    process.env.EXPO_PUBLIC_DEEPSEEK_API_KEY ||
-    process.env.DEEPSEEK_API_KEY ||
-    process.env.EXPO_PUBLIC_HIVE_API_KEY ||
-    '';
-
-  // 웹 브라우저 환경에서는 CORS 우회를 위해 /api/ai/deepseek 프록시 사용
-  const baseUrl =
-    Platform.OS === 'web' && typeof window !== 'undefined'
-      ? '/api/ai/deepseek'
-      : process.env.EXPO_PUBLIC_DEEPSEEK_BASE_URL || 'https://api-cdn.thehive.ai/api/v3';
-
-  const model =
-    process.env.EXPO_PUBLIC_DEEPSEEK_MODEL ||
-    process.env.DEEPSEEK_MODEL ||
-    'deepseek-ai/deepseek-v4.1-flash-1017';
-
-  return { apiKey, baseUrl, model };
+  const baseUrl = Platform.OS === 'web' && typeof window !== 'undefined'
+    ? '/api/ai/deepseek'
+    : '';
+  const model = process.env.EXPO_PUBLIC_DEEPSEEK_MODEL || 'deepseek-ai/deepseek-v4.1-flash-1017';
+  return { baseUrl, model };
 }
 
 export function isDeepSeekConfigured(): boolean {
-  return Boolean(getDeepSeekConfig().apiKey);
-}
-
-/**
- * 클라이언트 단에서 커스텀 Hive/DeepSeek API Key 저장
- */
-export function setCustomDeepSeekKey(key: string) {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    if (key.trim()) {
-      window.localStorage.setItem('dize_hive_secret_key', key.trim());
-    } else {
-      window.localStorage.removeItem('dize_hive_secret_key');
-    }
-  }
+  return Boolean(getDeepSeekConfig().baseUrl);
 }
 
 /**
@@ -139,12 +106,12 @@ export async function generateOotdWithDeepSeek(
   gender: Gender,
   styleMood?: string
 ): Promise<DeepSeekOotdResult> {
-  const { apiKey, baseUrl, model } = getDeepSeekConfig();
+  const { baseUrl, model } = getDeepSeekConfig();
 
-  if (!apiKey) {
+  if (!baseUrl) {
     return {
       success: false,
-      errorMessage: 'TheHive / DeepSeek API 키가 설정되지 않았습니다.',
+      errorMessage: 'AI 생성은 현재 웹에서만 지원됩니다.',
     };
   }
 
@@ -215,9 +182,6 @@ export async function generateOotdWithDeepSeek(
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (!isProxy) {
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
 
     const response = await fetch(endpoint, {
       method: 'POST',

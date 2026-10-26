@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const API_KEY = process.env.EXPO_PUBLIC_HIVE_SECRET_KEY || '';
+const API_KEY = process.env.HIVE_SECRET_KEY;
+if (!API_KEY) throw new Error('HIVE_SECRET_KEY must be explicitly supplied');
 const ENDPOINT = 'https://api-cdn.thehive.ai/api/v3/black-forest-labs/flux-schnell';
 
 const BASE_DIRECTIVE = 'Master high-fashion catalog lookbook photograph. Full-body head-to-toe shot of a stylish 20s Korean model standing upright, facing camera directly, centered in 9:16 vertical frame. Full length body visible from top of head to bottom of shoes. 8k photorealistic.';

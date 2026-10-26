@@ -1,6 +1,6 @@
 {
-  "verified_at": "2026-10-26T20:10:50.123304",
-  "total_duration_sec": 1.97,
+  "verified_at": "2026-10-26T21:21:44.242278",
+  "total_duration_sec": 2.19,
   "results": {
     "typecheck": "PASS",
     "unit_tests": "PASS",
@@ -85,7 +85,7 @@
     ]
   },
   "environment": {
-    "node": "v22.12.0",
+    "node": "v23.11.0",
     "python": "3.14.4"
   }
 }
