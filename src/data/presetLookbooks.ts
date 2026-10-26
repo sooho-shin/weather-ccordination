@@ -162,7 +162,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '모던 미니멀 셋업 블레이저',
     styleDescription: '드롭숄더 다크 차콜 블레이저와 와이드 팬츠로 완성한 컨템포러리 셋업',
-    imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm4_outer', category: 'outer', name: '오버핏 차콜 싱글 블레이저', iconName: 'shirt-outline', description: '자연스러운 어깨 패드의 세련된 미니멀 자켓' },
@@ -180,7 +180,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#선선한_가을바람","#일교차_대비","#감각적인_레이어드"],
     styleTitle: '유틸리티 코튼 셔켓 캐주얼',
     styleDescription: '포켓 디테일의 코튼 오버셔츠와 데님을 매치한 편안한 데일리 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm5_outer', category: 'outer', name: '유틸리티 포켓 코튼 셔켓', iconName: 'shirt-outline', description: '아우터처럼 툭 걸치기 좋은 오버사이즈 셔츠' },
@@ -202,7 +202,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '리조트 서머 린넨 셋업',
     styleDescription: '뜨거운 태양 아래 쾌적함을 유지하는 고급스러운 내추럴 린넨 탑 & 숏츠',
-    imageUrl: 'https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_s1_top', category: 'top', name: '스퀘어넥 린넨 슬리브리스', iconName: 'shirt-outline', description: '통기성이 뛰어난 내추럴 오트밀 린넨 탑' },
@@ -220,7 +220,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '내추럴 맥시 린넨 원피스',
     styleDescription: '바람이 잘 통하는 A라인 실루엣의 에크루 린넨 롱드레스 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_s2_top', category: 'top', name: '백슬릿 린넨 맥시 드레스', iconName: 'shirt-outline', description: '우아하게 퍼지는 릴랙스 핏 롱원피스' },
@@ -237,7 +237,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '쿨 시어 셔츠 & 버뮤다 룩',
     styleDescription: '은은한 시스루 셔츠와 와이드 버뮤다 팬츠로 연출한 도회적 시크',
-    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_4.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_s3_outer', category: 'outer', name: '시어 오버핏 반팔 셔츠', iconName: 'shirt-outline', description: '에어컨 바람과 자외선을 막아주는 얇은 시스루 셔츠' },
@@ -255,7 +255,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '서머 홀터 니트 & 플루이드 팬츠',
     styleDescription: '시원한 홀터넥 골지 니트와 차르르 흐르는 린넨 슬랙스의 올드머니 서머',
-    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_s4_top', category: 'top', name: '쿨 터치 홀터넥 니트', iconName: 'shirt-outline', description: '몸에 달라붙지 않는 기능성 서머 얀 탑' },
@@ -272,7 +272,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '스포티 파라슈트 서머 스트릿',
     styleDescription: '쿨맥스 크롭 티셔츠와 경량 파라슈트 롱스커트의 트렌디 스트릿 믹스',
-    imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_5.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_s5_top', category: 'top', name: '쿨맥스 슬림 크롭 반팔', iconName: 'shirt-outline', description: '흡습속건이 우수한 스포티 크롭 티셔츠' },
@@ -293,7 +293,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '클린 서머 린넨 & 버뮤다',
     styleDescription: '땀 흡수가 뛰어나고 시원한 린넨 셔츠와 단정한 버뮤다 반바지',
-    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_s1_top', category: 'top', name: '오픈카라 린넨 반팔 셔츠', iconName: 'shirt-outline', description: '목선이 시원한 스카이블루 린넨 셔츠' },
@@ -310,7 +310,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '시티 서머 스트라이프 셔츠',
     styleDescription: '여유로운 핏의 시어서커 스트라이프 셔츠와 와이드 치노 쇼츠',
-    imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_s2_top', category: 'top', name: '시어서커 오버핏 반팔 셔츠', iconName: 'shirt-outline', description: '피부에 닿는 면적이 적어 쾌적한 요루 원단' },
@@ -327,7 +327,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '헤비웨이트 박시티 & 유틸리티 쇼츠',
     styleDescription: '체형을 보정해주는 탄탄한 오버핏 반팔과 기능성 나일론 쇼츠의 조화',
-    imageUrl: 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_s3_top', category: 'top', name: '헤비웨이트 16수 코튼 티', iconName: 'shirt-outline', description: '목 늘어남 없는 탄탄한 블랙 오버핏 티' },
@@ -344,7 +344,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '서머 카라 니트 & 린넨 트라우저',
     styleDescription: '고급스러운 피케 카라 니트와 긴 기장의 린넨 슬랙스로 연출한 단정한 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_s4_top', category: 'top', name: '오픈카라 하프 슬리브 니트', iconName: 'shirt-outline', description: '통기성이 좋은 썸머 부클레 원사의 카라 니트' },
@@ -361,7 +361,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#통기성_린넨","#자외선_차단","#선글라스_추천"],
     styleTitle: '어반 아웃도어 그래픽 캐주얼',
     styleDescription: '감각적인 백프린팅 티셔츠와 이지 웨이스트 밴딩 쇼츠의 스트릿 무드',
-    imageUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_s5_top', category: 'top', name: '빈티지 아카이브 그래픽 티', iconName: 'shirt-outline', description: '피그먼트 워싱이 들어간 오버사이즈 티셔츠' },
@@ -382,7 +382,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '클래식 하운드투스 블레이저',
     styleDescription: '차가운 바람을 막아주는 탄탄한 하운드투스 체크 울 자켓과 모크넥 니트',
-    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_f1_outer', category: 'outer', name: '오버핏 하운드투스 블레이저', iconName: 'shirt-outline', description: '멋스러운 실루엣의 도톰한 울 혼방 자켓' },
@@ -400,7 +400,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '빈티지 레더 & 맥시 데님 스커트',
     styleDescription: '바이크 무드의 비건 레더 블루종과 슬릿 롱 데님 스커트의 시크 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_f2_outer', category: 'outer', name: '빈티지 오버핏 레더 블루종', iconName: 'shirt-outline', description: '은은한 광택과 루즈한 핏의 가죽 자켓' },
@@ -418,7 +418,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '헤비 램스울 집업 & 와이드 슬랙스',
     styleDescription: '두툼한 골지 투웨이 집업 카디건과 핀턱 와이드 슬랙스의 포근한 데일리',
-    imageUrl: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_f3_outer', category: 'outer', name: '투웨이 골지 울 집업 가디건', iconName: 'shirt-outline', description: '위아래로 열리는 하이넥 램스울 스웨터' },
@@ -435,7 +435,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '스웨이드 크롭 바시티 & 치노',
     styleDescription: '클래식한 카멜 스웨이드 점퍼와 크림 와이드 코튼 팬츠의 웜 톤온톤',
-    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_4.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_f4_outer', category: 'outer', name: '카멜 스웨이드 바시티 자켓', iconName: 'shirt-outline', description: '부드러운 스웨이드 터치감의 숏 블루종' },
@@ -453,7 +453,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '다이아 퀼팅 자켓 & 코듀로이 룩',
     styleDescription: '가벼운 패딩 충전재의 다이아 퀼팅 자켓과 따뜻한 골덴 팬츠',
-    imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_5.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_f5_outer', category: 'outer', name: '라이트 다이아 퀼팅 자켓', iconName: 'shirt-outline', description: '코듀로이 카라 배색의 경량 퀼팅 아우터' },
@@ -474,7 +474,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '모던 워크웨어 필드 자켓',
     styleDescription: '간절기 든든하고 활동적인 카키 야상 자켓과 와플 니트 레이어드',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_f1_outer', category: 'outer', name: '워시드 M-65 필드 자켓', iconName: 'shirt-outline', description: '포켓 디테일이 돋보이는 오버핏 카키 야상' },
@@ -492,7 +492,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '클래식 해링턴 블루종 & 셀비지',
     styleDescription: '단정한 스탠드 카라 해링턴 자켓과 롤업 생지 데님의 클래식 캐주얼',
-    imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_f2_outer', category: 'outer', name: '해링턴 코튼 블루종 자켓', iconName: 'shirt-outline', description: '타탄 체크 안감이 매력적인 네이비 자켓' },
@@ -510,7 +510,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '헤링본 울 트위드 자켓 & 터틀넥',
     styleDescription: '세련된 헤링본 패턴 블레이저와 블랙 모크넥으로 완성한 댄디 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_f3_outer', category: 'outer', name: '헤링본 울 트위드 자켓', iconName: 'shirt-outline', description: '도톰하고 클래식한 그레이 헤링본 블레이저' },
@@ -528,7 +528,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '오버핏 모헤어 니트 & 와이드 카고',
     styleDescription: '브러쉬드 모헤어 니트와 블랙 와이드 카고 슬랙스의 트렌디 스트릿',
-    imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_f4_top', category: 'top', name: '헤어리 브러쉬드 모헤어 니트', iconName: 'shirt-outline', description: '풍성한 볼륨감의 올리브 그린 라운드 스웨터' },
@@ -545,7 +545,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#일교차_아우터","#아침저녁_쌀쌀","#단정한_가을룩"],
     styleTitle: '덕 캔버스 카펜터 자켓 캐주얼',
     styleDescription: '탄탄한 덕 캔버스 워크자켓과 그레이 후디를 매치한 시티 캐주얼',
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_f5_outer', category: 'outer', name: '덕 캔버스 코듀로이 카라 자켓', iconName: 'shirt-outline', description: '내구성이 뛰어난 브라운 워크웨어 자켓' },
@@ -567,7 +567,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '윈터 웜 구스다운 & 코듀로이',
     styleDescription: '눈 오는 한겨울 바람을 막아주는 프리미엄 롱 구스다운과 골덴 팬츠',
-    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_5.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_w1_outer', category: 'outer', name: '프리미엄 롱 구스다운 패딩', iconName: 'shirt-outline', description: '풍성한 볼륨과 완벽 방한 방풍 롱패딩' },
@@ -585,7 +585,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '오버사이즈 시어링 롱무스탕',
     styleDescription: '풍성한 양털 시어링 안감의 롱 무스탕 코트와 부츠컷 팬츠의 글램 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_w2_outer', category: 'outer', name: '에코 시어링 롱 무스탕 코트', iconName: 'shirt-outline', description: '강력한 보온성과 럭셔리한 실루엣의 아우터' },
@@ -603,7 +603,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '글로시 숏 푸퍼 & 후드 셋업',
     styleDescription: '트렌디한 유광 크롭 다운 자켓과 기모 조거팬츠의 영앤트렌디 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_w3_outer', category: 'outer', name: '글로시 크롭 숏 푸퍼 패딩', iconName: 'shirt-outline', description: '은은한 광택감의 트렌디 하이넥 다운 점퍼' },
@@ -621,7 +621,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '캐시미어 더블 롱코트 & 머플러',
     styleDescription: '우아한 카멜 캐시미어 코트에 풍성한 울 머플러를 두른 올드머니 윈터',
-    imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_4.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_w4_outer', category: 'outer', name: '핸드메이드 캐시미어 더블 코트', iconName: 'shirt-outline', description: '발목까지 감싸는 프리미엄 카멜 롱코트' },
@@ -640,7 +640,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '테크니컬 다운 아노락 & 웜 조거',
     styleDescription: '영하의 눈보라 속에서도 완벽한 방풍 발수 아노락 패딩 스타일',
-    imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_w5_outer', category: 'outer', name: '발수 코팅 하프집 다운 아노락', iconName: 'shirt-outline', description: '눈이 스며들지 않는 테크니컬 충전재 아우터' },
@@ -661,7 +661,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '헤비 윈터 다운 파카',
     styleDescription: '영하의 추위와 눈보라에도 끄떡없는 헤비 덕다운 파카와 기모 카고',
-    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_w1_outer', category: 'outer', name: '헤비 덕다운 익스페디션 파카', iconName: 'shirt-outline', description: '발수 코팅과 극강의 보온성을 갖춘 대장급 패딩' },
@@ -679,7 +679,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '클래식 발마칸 울 롱코트',
     styleDescription: '두툼한 이중지 울 원사의 싱글 래글런 발마칸 코트와 캐시미어 니트',
-    imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_w2_outer', category: 'outer', name: '헤비 울 래글런 발마칸 코트', iconName: 'shirt-outline', description: '바람을 막아주는 카라 비조 디테일의 롱코트' },
@@ -697,7 +697,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '밀리터리 몬스터 다운 파카',
     styleDescription: '레벨7 몬스터 파카 기반 오버핏 다운과 스웨트 셋업의 어반 밀리터리',
-    imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_w3_outer', category: 'outer', name: '밀리터리 레벨7 몬스터 파카', iconName: 'shirt-outline', description: '초경량 고보온 프리마로프트 충전 패딩' },
@@ -715,7 +715,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '빈티지 레더 무스탕 자켓',
     styleDescription: '두터운 양털 카라의 브라운 레더 무스탕과 묵직한 생지 데님 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_w4_outer', category: 'outer', name: 'B-3 양털 무스탕 자켓', iconName: 'shirt-outline', description: '천연 양털 칼라와 빈티지 가죽의 헤비 아우터' },
@@ -733,7 +733,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#한파대비_패딩","#목도리_필수","#빙판길_주의"],
     styleTitle: '미니멀 숏 푸퍼 & 골덴 팬츠',
     styleDescription: '군더더기 없는 블랙 유광 숏패딩과 브라운 코듀로이 턱팬츠의 캐주얼',
-    imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_w5_outer', category: 'outer', name: '미니멀 스탠드카라 숏패딩', iconName: 'shirt-outline', description: '밑단 스트링으로 핏을 조절하는 숏 다운' },
@@ -755,7 +755,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '레인 프로텍션 윈드브레이커',
     styleDescription: '빗방울을 튕겨내는 발수 윈드브레이커와 감각적인 첼시 레인부츠',
-    imageUrl: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_5.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_r1_outer', category: 'outer', name: '방수 레인 윈드브레이커', iconName: 'umbrella-outline', description: '비바람을 완벽 차단하는 발수 자켓' },
@@ -773,7 +773,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '방수 코팅 싱글 레인 트렌치',
     styleDescription: '테플론 발수 가공된 싱글 트렌치코트와 크롭 데님의 프렌치 레인 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_4.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_r2_outer', category: 'outer', name: '발수 코팅 싱글 맥 트렌치', iconName: 'umbrella-outline', description: '빗물이 또르르 흘러내리는 경량 트렌치' },
@@ -791,7 +791,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '오버핏 하프집 아노락 & 쇼츠',
     styleDescription: '스포티한 방풍 나일론 아노락과 퀵드라이 쇼츠, 롱 레인부츠의 믹스매치',
-    imageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_r3_outer', category: 'outer', name: '나일론 투웨이 레인 아노락', iconName: 'umbrella-outline', description: '가볍고 습기를 빠르게 방출하는 기능성 아우터' },
@@ -808,7 +808,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '후디드 롱 레인파카 & 조거',
     styleDescription: '무릎까지 덮어주는 방수 후드 파카와 조거팬츠로 완성한 편안한 출근룩',
-    imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_autumn_14c_5.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_r4_outer', category: 'outer', name: '드로스트링 롱 레인파카', iconName: 'umbrella-outline', description: '허리 스트링으로 실루엣을 조절하는 올리브 파카' },
@@ -826,7 +826,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '테크니컬 고프코어 쉘 & 파라슈트',
     styleDescription: '투습 방수 3레이어 쉘 자켓과 나일론 파라슈트 팬츠의 어반 테크웨어',
-    imageUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/female_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'f_r5_outer', category: 'outer', name: '3레이어 고어쉘 후드자켓', iconName: 'umbrella-outline', description: '폭우에도 끄떡없는 고기능성 하드쉘' },
@@ -847,7 +847,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '어반 고어텍스 쉘자켓 코디',
     styleDescription: '우천 시 쾌적한 출퇴근을 위한 투습 방수 하이엔드 쉘자켓과 발수 조거',
-    imageUrl: 'https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_r1_outer', category: 'outer', name: '고어텍스 후드 쉘자켓', iconName: 'umbrella-outline', description: '투습 방수 기능의 하이엔드 블랙 쉘자켓' },
@@ -865,7 +865,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '비즈니스 발수 싱글 맥코트',
     styleDescription: '비에 젖지 않는 방수 코팅 원사의 네이비 맥코트와 옥스포드 셔츠 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_2.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_r2_outer', category: 'outer', name: '워터프루프 싱글 맥코트', iconName: 'umbrella-outline', description: '단정하고 포멀한 비즈니스 겸용 레인코트' },
@@ -883,7 +883,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '테크 아노락 & 유틸리티 쇼츠',
     styleDescription: '하프집업 발수 아노락과 무릎 위 숏팬츠, 워터프루프 부츠의 쿨 캐주얼',
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_3.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_r3_outer', category: 'outer', name: '유틸리티 나일론 레인 아노락', iconName: 'umbrella-outline', description: '대형 캥거루 포켓이 달린 발수 자켓' },
@@ -900,7 +900,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '후디드 윈드쉘 & 와이드 치노',
     styleDescription: '가볍게 걸치기 좋은 라이트 윈드쉘과 롤업 와이드 팬츠의 시티 데일리',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_autumn_14c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_r4_outer', category: 'outer', name: '초경량 팩커블 윈드쉘', iconName: 'umbrella-outline', description: '갑작스러운 소나기에도 꺼내입기 좋은 자켓' },
@@ -918,7 +918,7 @@ export const PRESET_LOOKBOOKS: OutfitLookbook[] = [
     weatherDefenseTags: ["#우산_필수","#밝은바지_금지","#방수_레인부츠"],
     styleTitle: '셔츠형 레인 자켓 & 테크 팬츠',
     styleDescription: '스냅 버튼의 오버핏 셔켓과 발수 카고 팬츠로 연출한 모던 테크 룩',
-    imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=1080&q=85',
+    imageUrl: require('../../assets/lookbooks/male_trendy_22c_1.jpg'),
     imageSource: 'preset',
     items: [
       { id: 'm_r5_outer', category: 'outer', name: '발수 코팅 스냅 셔켓', iconName: 'umbrella-outline', description: '자켓처럼 단정한 셔츠형 레인 아우터' },
