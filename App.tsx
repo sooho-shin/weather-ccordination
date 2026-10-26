@@ -17,6 +17,7 @@ import { TpoTabBar } from './src/components/TpoTabBar';
 import { StyleGuideSheet } from './src/components/StyleGuideSheet';
 import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
+import { generateOotdWithDeepSeek, isDeepSeekConfigured } from './src/services/ai/deepseekService';
 
 export default function App() {
   // 0. 웹 및 네이티브 폰트 안전 로드
@@ -68,6 +69,7 @@ export default function App() {
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [aiCustomLookbook, setAiCustomLookbook] = useState<OutfitLookbook | null>(null);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
 
   const [simulatorVisible, setSimulatorVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
@@ -206,6 +208,27 @@ export default function App() {
     setActiveSlideIndex(0);
   };
 
+  // 실시간 TheHive DeepSeek V4.1 AI 코디 추천 생성 핸들러
+  const handleQuickAiRecommend = useCallback(async () => {
+    if (isAiGenerating) return;
+    setIsAiGenerating(true);
+    try {
+      const targetGender = gender === 'all' ? 'female' : gender;
+      const res = await generateOotdWithDeepSeek(weather, selectedTpo, targetGender);
+      if (res.success && res.lookbook) {
+        setAiCustomLookbook(res.lookbook);
+        setActiveSlideIndex(0);
+      } else {
+        setAiModalVisible(true);
+      }
+    } catch (err) {
+      console.warn('AI 추천 실패:', err);
+      setAiModalVisible(true);
+    } finally {
+      setIsAiGenerating(false);
+    }
+  }, [isAiGenerating, weather, selectedTpo, gender]);
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -264,6 +287,8 @@ export default function App() {
             onSelectIndex={(index) => setActiveSlideIndex(index)}
             onShuffle={handleShuffleLookbook}
             onOpenAIGenerator={() => setAiModalVisible(true)}
+            onQuickAiGenerate={handleQuickAiRecommend}
+            isAiGenerating={isAiGenerating}
             isAiGenerated={currentLookbook.imageSource === 'ai'}
           />
         )}

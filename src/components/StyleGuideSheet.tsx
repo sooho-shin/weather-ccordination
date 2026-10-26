@@ -5,6 +5,7 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
   Platform,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
@@ -19,6 +20,8 @@ interface StyleGuideSheetProps {
   onSelectIndex: (index: number) => void;
   onShuffle: () => void;
   onOpenAIGenerator: () => void;
+  onQuickAiGenerate?: () => void;
+  isAiGenerating?: boolean;
   isAiGenerated?: boolean;
 }
 
@@ -29,6 +32,8 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   onSelectIndex,
   onShuffle,
   onOpenAIGenerator,
+  onQuickAiGenerate,
+  isAiGenerating = false,
   isAiGenerated = false,
 }) => {
   const defenseTags = lookbook.weatherDefenseTags || ['#오늘의_OOTD', '#날씨맞춤'];
@@ -46,8 +51,8 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             </View>
             {isAiGenerated && (
               <View style={styles.aiBadge}>
-                <Ionicons name="sparkles" size={10} color="#FF9500" />
-                <Text style={styles.aiBadgeText}>DeepSeek AI</Text>
+                <Ionicons name="sparkles" size={11} color="#FF9500" />
+                <Text style={styles.aiBadgeText}>DeepSeek V4.1 AI</Text>
               </View>
             )}
           </View>
@@ -93,7 +98,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             ))}
           </View>
 
-          {/* 버튼 그룹: 코디 셔플 🔀 & AI 맞춤 */}
+          {/* 버튼 그룹: 코디 셔플 🔀 & DeepSeek AI 실시간 추천 */}
           <View style={styles.buttonGroup}>
             <TouchableOpacity
               style={styles.shuffleBtn}
@@ -105,12 +110,28 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.aiButton}
-              onPress={onOpenAIGenerator}
+              style={[styles.aiButton, isAiGenerating && styles.aiButtonDisabled]}
+              onPress={onQuickAiGenerate || onOpenAIGenerator}
+              disabled={isAiGenerating}
               activeOpacity={0.8}
             >
-              <Ionicons name="sparkles" size={13} color="#FF9500" />
-              <Text style={styles.aiButtonLabel}>AI 맞춤</Text>
+              {isAiGenerating ? (
+                <ActivityIndicator size="small" color="#FF9500" style={{ marginRight: 4 }} />
+              ) : (
+                <Ionicons name="sparkles" size={13} color="#FF9500" />
+              )}
+              <Text style={styles.aiButtonLabel}>
+                {isAiGenerating ? 'AI 분석중...' : 'DeepSeek AI'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.moreAiBtn}
+              onPress={onOpenAIGenerator}
+              activeOpacity={0.7}
+              accessibilityLabel="AI 무드 선택"
+            >
+              <Ionicons name="options-outline" size={14} color="#666666" />
             </TouchableOpacity>
           </View>
         </View>
@@ -313,5 +334,18 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#FF9500',
+  },
+  aiButtonDisabled: {
+    opacity: 0.6,
+  },
+  moreAiBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
 });

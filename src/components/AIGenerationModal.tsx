@@ -51,27 +51,12 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
     try {
       // 1. DeepSeek API가 설정되어 있는 경우 지능형 코디 엔진 우선 시도
       if (isDeepSeekConfigured()) {
-        const dsResult = await generateOotdWithDeepSeek(
-          weather,
-          selectedMood === '클래식 포멀' ? 'office' : selectedMood === '시크 스트릿' ? 'street' : 'daily',
-          gender
-        );
+        const targetTpo =
+          selectedMood === '클래식 포멀' ? 'office' : selectedMood === '시크 스트릿' ? 'street' : 'daily';
+        const dsResult = await generateOotdWithDeepSeek(weather, targetTpo, gender, selectedMood);
 
-        if (dsResult.success && dsResult.items && dsResult.items.length > 0) {
-          const aiLookbook: OutfitLookbook = {
-            id: `ai_deepseek_${Date.now()}`,
-            gender,
-            tempBand: '20to22',
-            weatherState: weather.weatherState,
-            styleTitle: dsResult.styleTitle || `${selectedMood} 맞춤 코디`,
-            styleDescription: dsResult.styleDescription || 'DeepSeek가 추천하는 오늘 날씨 최적의 착장',
-            weatherDefenseTags: dsResult.weatherDefenseTags,
-            imageUrl: require('../../assets/lookbooks/female_trendy_22c_1.jpg'),
-            items: dsResult.items,
-            imageSource: 'ai',
-            generatedAt: new Date().toISOString(),
-          };
-          onGenerationSuccess(aiLookbook);
+        if (dsResult.success && dsResult.lookbook) {
+          onGenerationSuccess(dsResult.lookbook);
           onClose();
           return;
         }
