@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { StyleSheet, View, SafeAreaView, TouchableOpacity, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
+import { useFonts } from 'expo-font';
 
 import { Gender, WeatherData, WeatherState } from './src/types/weather';
 import { OutfitLookbook, TpoCategory } from './src/types/outfit';
@@ -18,6 +19,35 @@ import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
 
 export default function App() {
+  // 0. 웹 및 네이티브 폰트 안전 로드
+  const [fontsLoaded] = useFonts({
+    Ionicons: require('./assets/fonts/Ionicons.ttf'),
+  });
+
+  // 웹 브라우저 환경에서 아이콘 폰트(Ionicons) CDN 및 디스플레이 보장
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const styleId = 'dize-font-fixes';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+          @font-face {
+            font-family: 'ionicons';
+            src: url('https://cdn.jsdelivr.net/npm/@expo/vector-icons@14.0.0/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf') format('truetype');
+            font-display: swap;
+          }
+          @font-face {
+            font-family: 'Ionicons';
+            src: url('https://cdn.jsdelivr.net/npm/@expo/vector-icons@14.0.0/build/vendor/react-native-vector-icons/Fonts/Ionicons.ttf') format('truetype');
+            font-display: swap;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+  }, []);
+
   // 1. 상태 관리: 성별(여/남/모두), TPO 탭(출근/데일리/스트릿), 날씨, 슬라이드 인덱스
   const [gender, setGender] = useState<Gender>('female');
   const [selectedTpo, setSelectedTpo] = useState<TpoCategory>('office');
