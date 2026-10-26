@@ -52,7 +52,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             {isAiGenerated && (
               <View style={styles.aiBadge}>
                 <Ionicons name="sparkles" size={11} color="#FF9500" />
-                <Text style={styles.aiBadgeText}>AI Curation</Text>
+                <Text style={styles.aiBadgeText}>AI 맞춤</Text>
               </View>
             )}
           </View>
