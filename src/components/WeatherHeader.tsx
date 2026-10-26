@@ -9,6 +9,7 @@ interface WeatherHeaderProps {
   onSelectGender: (gender: Gender) => void;
   onOpenSimulator: () => void;
   onOpenAIGenerator: () => void;
+  isWeatherReady?: boolean;
 }
 
 export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
@@ -17,6 +18,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onSelectGender,
   onOpenSimulator,
   onOpenAIGenerator,
+  isWeatherReady = true,
 }) => {
   const getWeatherIcon = () => {
     switch (weather.weatherState) {

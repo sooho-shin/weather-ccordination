@@ -8,8 +8,8 @@ import { Gender, WeatherData, WeatherState } from './src/types/weather';
 import { OutfitLookbook, TpoCategory } from './src/types/outfit';
 import { getTemperatureBand } from './src/constants/temperatureBands';
 import { findMatchingLookbooks } from './src/data/presetLookbooks';
-import { getCurrentLocation } from './src/services/locationService';
-import { fetchCurrentWeather } from './src/services/weatherService';
+import { getCurrentLocation, getCachedLocation } from './src/services/locationService';
+import { fetchCurrentWeather, getCachedWeather } from './src/services/weatherService';
 
 import { FullscreenBackground } from './src/components/FullscreenBackground';
 import { WeatherHeader } from './src/components/WeatherHeader';
@@ -53,20 +53,27 @@ export default function App() {
   const [gender, setGender] = useState<Gender>('female');
   const [selectedTpo, setSelectedTpo] = useState<TpoCategory>('office');
 
-  // 기본 즉시 렌더링용 22° 맑음 초기값 (체감 키워드 및 최고/최저 기온 포함)
-  const [weather, setWeather] = useState<WeatherData>({
-    temperature: 22,
-    tempMax: 25,
-    tempMin: 16,
-    apparentKeyword: '선선하다',
-    weatherStateKeyword: '맑음',
-    weatherState: 'Clear',
-    weatherDescription: '맑음',
-    precipitation: 0,
-    locationName: '서울특별시 중구',
-    isSimulated: false,
+  // 0. 캐시된 날씨 또는 최근 위치 기반 초기값 (서울특별시 덜컹거림 원천 차단)
+  const [weather, setWeather] = useState<WeatherData>(() => {
+    const cached = getCachedWeather();
+    if (cached) return cached;
+
+    const cachedLoc = getCachedLocation();
+    return {
+      temperature: 18,
+      tempMax: 21,
+      tempMin: 12,
+      apparentKeyword: '선선하다',
+      weatherStateKeyword: '날씨 확인중',
+      weatherState: 'Clear',
+      weatherDescription: '맑음',
+      precipitation: 0,
+      locationName: cachedLoc?.name || '현재 위치 확인 중...',
+      isSimulated: false,
+    };
   });
 
+  const [isWeatherReady, setIsWeatherReady] = useState(() => Boolean(getCachedWeather()));
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [aiCustomLookbook, setAiCustomLookbook] = useState<OutfitLookbook | null>(null);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
@@ -80,8 +87,10 @@ export default function App() {
       const loc = await getCurrentLocation();
       const realWeather = await fetchCurrentWeather(loc.latitude, loc.longitude, loc.name);
       setWeather(realWeather);
+      setIsWeatherReady(true);
     } catch (e) {
-      console.warn('날씨 로딩 실패, 기본값 유지:', e);
+      console.warn('날씨 로딩 실패, 기존값 유지:', e);
+      setIsWeatherReady(true);
     }
   }, []);
 
@@ -248,6 +257,7 @@ export default function App() {
             onSelectGender={handleSelectGender}
             onOpenSimulator={() => setSimulatorVisible(true)}
             onOpenAIGenerator={() => setAiModalVisible(true)}
+            isWeatherReady={isWeatherReady}
           />
 
           {/* 중앙 상단: TPO 3분할 탭 바 ([ 출근/단정 ] [ 데일리/캐주얼 ] [ 스트릿/힙 ]) */}

@@ -1,5 +1,33 @@
 import { WeatherData, WeatherState } from '../types/weather';
 
+const STORAGE_KEY_WEATHER = 'dize_cached_weather';
+
+/**
+ * 로컬 캐시된 최근 날씨 조회
+ */
+export function getCachedWeather(): WeatherData | null {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY_WEATHER);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {}
+  }
+  return null;
+}
+
+/**
+ * 최근 날씨 로컬 캐싱
+ */
+export function saveCachedWeather(weather: WeatherData) {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(STORAGE_KEY_WEATHER, JSON.stringify(weather));
+    } catch {}
+  }
+}
+
 /**
  * 기온 및 날씨 상태 기반 직관적 체감 키워드 산출
  */
@@ -81,7 +109,7 @@ export async function fetchCurrentWeather(
 
     const { apparentKeyword, weatherStateKeyword } = getApparentWeatherKeywords(temp, state);
 
-    return {
+    const result: WeatherData = {
       temperature: temp,
       tempMax,
       tempMin,
@@ -93,8 +121,16 @@ export async function fetchCurrentWeather(
       locationName,
       isSimulated: false,
     };
+
+    // 성공한 실제 날씨를 로컬 캐시에 저장
+    saveCachedWeather(result);
+
+    return result;
   } catch (error) {
-    console.warn('날씨 API 호출 실패 또는 타임아웃, 기본 22도 맑음 날씨로 폴백:', error);
+    console.warn('날씨 API 호출 실패 또는 타임아웃, 캐시 또는 기본 날씨로 폴백:', error);
+    const cached = getCachedWeather();
+    if (cached) return cached;
+
     const { apparentKeyword, weatherStateKeyword } = getApparentWeatherKeywords(22, 'Clear');
     return {
       temperature: 22,
@@ -105,7 +141,7 @@ export async function fetchCurrentWeather(
       weatherState: 'Clear',
       weatherDescription: '맑음',
       precipitation: 0,
-      locationName: locationName || '서울특별시 중구',
+      locationName: locationName || '현재 위치',
       isSimulated: false,
     };
   }
