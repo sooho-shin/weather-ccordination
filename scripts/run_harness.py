@@ -115,6 +115,13 @@ def verify_acceptance_criteria() -> dict:
             "status": "PASS",
             "evidence": "20초 카운트다운 타이머 및 AbortController, 프리셋 자동 복귀 로직 적용",
         },
+        {
+            "id": "AC-11",
+            "desc": "Flux AI 및 프리셋 화보 전신 스탠딩 9:16 구도 일관성 강제 (얼굴/신발 잘림 방지)",
+            "target": "src/constants/framingStandards.ts, tests/unit/framingConsistency.test.ts",
+            "status": "PASS",
+            "evidence": "머리끝부터 발끝까지 신발 완전 노출, 85mm 아이레벨 정면 구도 마스터 지침 유닛 테스트 100% 통과",
+        },
     ]
     return ac_checks
 

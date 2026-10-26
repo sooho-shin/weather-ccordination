@@ -110,10 +110,10 @@ export function buildOutfitPrompt(request: AIOutfitGenerationRequest): PromptBui
   }
 
   const prompt = [
-    `Ultra-realistic 8k full-body candid fashion editorial photograph of a ${genderEn}`,
-    `walking naturally outdoors, ${outfitDescriptionEn}`,
+    `Ultra-realistic 8k full-body head-to-toe fashion editorial photograph of a ${genderEn}`,
+    `standing upright naturally outdoors, centered in 9:16 vertical frame, ${outfitDescriptionEn}`,
     `Weather and mood: ${weatherAtmosphere}, temperature feeling around ${temperature}°C (${tempBand.summary})`,
-    'Natural candid smile, high fashion magazine quality, Leica 50mm f/1.4 lens bokeh, sharp authentic fabric textures and seams, hyper-realistic, 8k resolution, cinematic composition',
+    'Full body visible from head to toe, entire shoes and feet fully visible on the ground, eye-level straight frontal angle, no close-up, no cropped feet, no cropped head, sharp authentic fabric textures and seams, hyper-realistic, 8k resolution, cinematic composition',
   ].join(', ');
 
   return {
