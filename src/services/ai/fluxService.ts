@@ -38,6 +38,7 @@ export async function generateFashionImageWithFlux(
       body: JSON.stringify({
         input: {
           prompt: standardizedPrompt,
+          num_images: 1,
           image_size: {
             width: 768,
             height: 1344, // 9:16 모바일 전신 황금 비율

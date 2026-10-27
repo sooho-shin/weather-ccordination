@@ -4,20 +4,21 @@ import { Gender } from '../types/weather';
 
 export function buildItemImagePrompt(items: OutfitItem[], gender: Gender): string {
   const checklist = items.map((item) => {
-    const details = [item.name, item.description, item.imageDescription].filter(Boolean).join(' — ');
+    const details = (item.imageDescription?.trim() || item.name).slice(0, 60);
+    const identity = `${item.name} ${item.imageDescription || ''}`;
     if (item.category !== 'accessory') return `Wear ${details}.`;
-    if (/가방|토트|백|bag|tote|clutch/i.test(details)) {
-      return `Carry ${details} visibly in one hand beside the hip or over the shoulder. Keep the entire bag unobstructed and outside clothing; do not put both hands in pockets.`;
+    if (/가방|토트|백|bag|tote|clutch/i.test(identity)) {
+      return `Carry ${details} in one hand beside the hip, entire bag visible. Hands outside pockets.`;
     }
-    if (/우산|umbrella/i.test(details)) return `Hold ${details} visibly in one hand.`;
-    if (/안경|선글라스|글래스|glasses/i.test(details)) return `Wear ${details} visibly on the face.`;
+    if (/우산|umbrella/i.test(identity)) return `Hold ${details} visibly in one hand.`;
+    if (/안경|선글라스|글래스|glasses/i.test(identity)) return `Wear ${details} visibly on the face.`;
     return `Wear ${details} visibly.`;
   });
   return [
-    `A stylish 20s Korean ${gender === 'male' ? 'man' : 'woman'} standing upright, full-body head-to-toe fashion photograph.`,
-    'The following item checklist is authoritative. Depict EVERY listed garment, pair of shoes and accessory together on this one model. Match their colors, materials and shapes. Do not omit or substitute items.',
+    `Full-body fashion photo of a Korean ${gender === 'male' ? 'man' : 'woman'}.`,
+    'Show ALL listed items together, matching color, material and shape.',
     ...checklist,
-    'Use a pose that keeps every accessory and both shoes clearly visible. No text or labels in the image.',
+    'All accessories visible. No text.',
   ].join('\n');
 }
 

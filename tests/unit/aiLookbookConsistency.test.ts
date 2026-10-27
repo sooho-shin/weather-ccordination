@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import ts from 'typescript';
 import { buildItemImagePrompt, buildOutfitPrompt } from '../../src/utils/promptBuilder';
 import { OutfitItem } from '../../src/types/outfit';
+import { MASTER_FULLBODY_PROMPT_DIRECTIVE } from '../../src/constants/framingStandards';
 
 const require = createRequire(import.meta.url);
 const items: OutfitItem[] = [
@@ -55,14 +56,35 @@ test('every recommended item and accessory pose reaches the image prompt', async
   });
   const result = await client.generateOotdWithDeepSeek(weather, 'office', 'female');
   assert.equal(result.success, true);
-  for (const item of items) assert.ok(sentPrompt.includes(item.name));
+  for (const item of items) assert.ok(sentPrompt.includes(item.imageDescription || item.name));
   assert.match(sentPrompt, /structured brown leather tote bag/);
-  assert.match(sentPrompt, /one hand beside the hip or over the shoulder/);
+  assert.match(sentPrompt, /one hand beside the hip/);
   assert.match(sentPrompt, /on the face/);
   assert.match(sentPrompt, /Hold 우산/);
   assert.ok(!sentPrompt.includes('unrelated pink dress'));
   assert.equal(result.lookbook.imageSource, 'ai');
   assert.equal(result.lookbook.imageGenerationFailed, false);
+});
+
+test('image descriptions stay concise and a scarf mentioning a bag is still worn', () => {
+  const prompt = buildItemImagePrompt([
+    { ...items[1], imageDescription: 'brown leather tote bag ' + 'detailed '.repeat(80) },
+    { id: 'scarf', category: 'accessory', name: '캐시미어 머플러', description: '가방에 걸어도 좋아요', imageDescription: 'ivory cashmere scarf', iconName: 'ribbon-outline' },
+  ], 'female');
+  assert.match(prompt, /Carry brown leather tote bag/);
+  assert.match(prompt, /Wear ivory cashmere scarf/);
+  assert.ok(!prompt.includes('Carry ivory cashmere scarf'));
+  assert.ok(prompt.length < 600);
+});
+
+test('six detailed items and framing fit in a compact Flux request without omitting items', () => {
+  const sixItems = ['outer', 'top', 'bottom', 'shoes', 'accessory', 'accessory'].map((category, i) => ({
+    id: String(i), category, name: i === 4 ? '레더 토트백' : '아이템', iconName: 'shirt-outline',
+    imageDescription: `item${i} ` + 'navy wool detailed fabric '.repeat(20),
+  })) as OutfitItem[];
+  const prompt = MASTER_FULLBODY_PROMPT_DIRECTIVE + ' Outfit details: ' + buildItemImagePrompt(sixItems, 'female');
+  assert.ok(prompt.length <= 1024);
+  for (let i = 0; i < 6; i++) assert.ok(prompt.includes(`item${i}`));
 });
 
 for (const [name, flux] of [

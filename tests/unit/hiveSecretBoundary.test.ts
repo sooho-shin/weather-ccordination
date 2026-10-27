@@ -72,6 +72,7 @@ test('web Flux uses same-origin proxy without any credential', async () => {
     calls++;
     assert.equal(url, '/api/ai/flux');
     assert.equal(new Headers(options?.headers).has('Authorization'), false);
+    assert.equal(JSON.parse(String(options?.body)).input.num_images, 1);
     return new Response('{"output":[{"url":"https://example.test/image.png"}]}');
   });
   assert.equal((await client.generateFashionImageWithFlux('test')).success, true);

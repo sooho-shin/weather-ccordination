@@ -8,7 +8,7 @@
  * 4. 바뀌는 것은 오직 '모델의 얼굴(사람)'과 '착장(옷/신발)'뿐! 구도와 카메라 거리는 모든 사진이 쌍둥이처럼 일치해야 함.
  */
 
-export const MASTER_FULLBODY_PROMPT_DIRECTIVE = `Master high-fashion catalog lookbook photograph. Ultra-consistent centered full-body head-to-toe shot of a stylish 20s Korean model standing upright naturally, facing camera directly, centered in 9:16 vertical frame. CRITICAL COMPOSITION: Full length complete body MUST be visible from top of head to bottom of shoes. Clear visible distance between top of head and frame top, and clear floor visible beneath both shoes. Both shoes fully visible and touching the ground. Neutral minimalist architectural background, natural daylight, eye-level straight frontal perspective, 85mm full-frame lens, sharp authentic fabric textures, 8k resolution, photorealistic fashion editorial. Strictly NO close-up, NO waist crop, NO cropped feet, NO cropped shoes, NO cropped head.`;
+export const MASTER_FULLBODY_PROMPT_DIRECTIVE = `Master high-fashion catalog photograph of a stylish 20s Korean model. Full-body head-to-toe, centered in 9:16 vertical frame, standing upright facing camera. Eye-level, 85mm lens, photorealistic 8k natural daylight. Full length body with space above head and floor below both shoes, feet touching ground. No close-up, no waist crop, no cropped head, no cropped feet or shoes.`;
 
 export const MANDATORY_FULLBODY_KEYWORDS = [
   'full-body',
