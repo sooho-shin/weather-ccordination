@@ -8,25 +8,18 @@ interface OutfitItemCardProps {
 }
 
 export const OutfitItemCard: React.FC<OutfitItemCardProps> = ({ item }) => {
-  // 아이템 카테고리별 맞춤 아이콘 매핑
-  const renderIcon = () => {
-    switch (item.category) {
-      case 'outer':
-        return <Ionicons name="shirt-outline" size={30} color="#2C2C2E" />;
-      case 'top':
-        return <Ionicons name="shirt-outline" size={28} color="#2C2C2E" />;
-      case 'bottom':
-        return <Ionicons name="git-commit-outline" size={28} color="#2C2C2E" />;
-      case 'shoes':
-        return <Ionicons name="footsteps-outline" size={26} color="#2C2C2E" />;
-      default:
-        return <Ionicons name="glasses-outline" size={26} color="#2C2C2E" />;
-    }
-  };
+  const iconSize = item.category === 'outer' ? 30
+    : item.category === 'top' || item.category === 'bottom' ? 28 : 26;
 
   return (
     <View style={styles.card}>
-      <View style={styles.iconContainer}>{renderIcon()}</View>
+      <View style={styles.iconContainer}>
+        <Ionicons
+          name={item.iconName as React.ComponentProps<typeof Ionicons>['name']}
+          size={iconSize}
+          color="#2C2C2E"
+        />
+      </View>
       <Text style={styles.name} numberOfLines={2}>
         {item.name}
       </Text>
