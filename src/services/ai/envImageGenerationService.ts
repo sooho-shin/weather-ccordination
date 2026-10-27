@@ -64,14 +64,15 @@ export class EnvImageGenerationService implements ImageGenerationService {
         weatherDefenseTags: ['#오늘의_OOTD', '#날씨맞춤'],
         imageUrl: baseLookbook.imageUrl,
         items: suggestedItems.length > 0 ? suggestedItems : baseLookbook.items,
-        imageSource: 'ai',
+        imageSource: 'preset',
+        imageGenerationFailed: true,
         generatedAt: new Date().toISOString(),
       };
 
       return {
         success: true,
         lookbook: simulatedLookbook,
-        isFallback: false,
+        isFallback: true,
       };
     } catch (error: any) {
       console.warn('AI 코디 생성 실패/타임아웃 발생 -> 프리셋 코디로 안전하게 폴백합니다:', error);
@@ -80,7 +81,7 @@ export class EnvImageGenerationService implements ImageGenerationService {
       return {
         success: false,
         errorMessage: error.name === 'AbortError' ? '20초 타임아웃 초과' : error.message,
-        lookbook: presets[0],
+        lookbook: presets[0] ? { ...presets[0], imageGenerationFailed: true } : undefined,
         isFallback: true,
       };
     }

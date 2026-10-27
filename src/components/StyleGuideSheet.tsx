@@ -53,10 +53,12 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
                 OOTD Curation ({currentIndex + 1}/{totalCount})
               </Text>
             </View>
-            {isAiGenerated && (
+            {(isAiGenerated || lookbook.imageGenerationFailed) && (
               <View style={styles.aiBadge}>
                 <Ionicons name="sparkles" size={11} color="#FF9500" />
-                <Text style={styles.aiBadgeText}>AI 맞춤</Text>
+                <Text style={styles.aiBadgeText}>
+                  {lookbook.imageGenerationFailed ? '기존 사진 · 참고용' : 'AI 맞춤'}
+                </Text>
               </View>
             )}
           </View>
@@ -65,6 +67,12 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             {lookbook.styleDescription}
           </Text>
         </View>
+
+        {lookbook.imageGenerationFailed && (
+          <Text style={styles.imageNotice} accessibilityRole="alert">
+            이미지 생성에 실패해 기존 사진으로 대체했어요. 사진은 참고용이며 추천 아이템과 다를 수 있어요.
+          </Text>
+        )}
 
         {/* 2. 날씨 방어 태그 영역 (기획서 핵심: #우산_필수, #밝은바지_금지 등) */}
         <View style={styles.defenseTagsRow}>
@@ -164,6 +172,15 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
 };
 
 const styles = StyleSheet.create({
+  imageNotice: {
+    color: '#704400',
+    backgroundColor: '#FFF3D6',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+    fontSize: 12,
+    lineHeight: 18,
+  },
   wrapper: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 24 : 16,

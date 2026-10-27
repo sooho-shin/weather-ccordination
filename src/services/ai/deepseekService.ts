@@ -4,6 +4,7 @@ import { OutfitLookbook, TpoCategory, OutfitItem } from '../../types/outfit';
 import { getTemperatureBand } from '../../constants/temperatureBands';
 import { findMatchingLookbooks } from '../../data/presetLookbooks';
 import { generateFashionImageWithFlux } from './fluxService';
+import { buildItemImagePrompt } from '../../utils/promptBuilder';
 
 export interface DeepSeekOotdResult {
   success: boolean;
@@ -43,7 +44,7 @@ function cleanAndParseJson(content: string): any {
   if (jsonMatch) {
     try {
       return JSON.parse(jsonMatch[0]);
-    } catch {}
+    } catch { /* 아래의 전체 텍스트 파싱으로 재시도합니다. */ }
   }
 
   // 끝부분이 미세하게 잘린 경우 보정 시도
@@ -144,19 +145,19 @@ export async function generateOotdWithDeepSeek(
 2. 정형화되거나 뻔한 아이템(예: 타일러드 체크 블레이저만 반복)을 절대 추천하지 마십시오.
 3. 날씨와 기온에 맞춰 다양한 아우터(트렌치코트, 트러커, 블루종, 퀼팅 자켓, 니트 가디건, 레더 자켓, 후드 집업, 맥코트, 코트 등)와 이너(린넨 셔츠, 옥스포드 셔츠, 하프집업, 모헤어 니트, 케이블 니트 등), 팬츠(와이드 슬랙스, 테이퍼드 치노, 카펜터 팬츠, 생지 데님 등), 슈즈(로퍼, 더비, 첼시부츠, 독일군 스니커즈, 뮬 등)를 창의적이고 다채롭게 조합하십시오.
 4. 이번 추천 테마: "${randomVariation}"을 반영하십시오.
-5. 반드시 순수 JSON 객체만 출력하십시오 (마크다운 백틱 없이):
+5. 모든 items 항목에 imageDescription을 작성하십시오. 해당 아이템의 종류, 색상, 소재, 형태를 정확한 영어로 기술하고 name/description과 일치시키십시오. 가방, 안경, 우산 등 액세서리도 빠짐없이 포함하십시오.
+6. 반드시 순수 JSON 객체만 출력하십시오 (마크다운 백틱 없이):
 {
   "styleTitle": "새롭고 감각적인 패션 스타일 명칭 (예: 한남동 세미오버 린넨 셋업)",
   "styleDescription": "날씨와 상황에 어울리는 매력적인 1~2줄 코디 디렉팅 설명",
   "weatherDefenseTags": ["#방어태그1", "#태그2", "#태그3"],
   "items": [
-    {"category": "outer", "name": "아이템명", "description": "날씨 방어 및 스타일링 디테일"},
-    {"category": "top", "name": "아이템명", "description": "소재 및 레이어링 디테일"},
-    {"category": "bottom", "name": "아이템명", "description": "실루엣 및 원단 디테일"},
-    {"category": "shoes", "name": "아이템명", "description": "신발 디자인 및 착화감 디테일"},
-    {"category": "accessory", "name": "아이템명", "description": "가방, 우산 등 소품 디테일"}
-  ],
-  "imagePrompt": "A high-fashion full-body editorial photo of a chic Korean model in Seoul, wearing (세부 착장 영문 묘사), 8k, cinematic natural lighting"
+    {"category": "outer", "name": "아이템명", "description": "날씨 방어 및 스타일링 디테일", "imageDescription": "English visual description"},
+    {"category": "top", "name": "아이템명", "description": "소재 및 레이어링 디테일", "imageDescription": "English visual description"},
+    {"category": "bottom", "name": "아이템명", "description": "실루엣 및 원단 디테일", "imageDescription": "English visual description"},
+    {"category": "shoes", "name": "아이템명", "description": "신발 디자인 및 착화감 디테일", "imageDescription": "English visual description"},
+    {"category": "accessory", "name": "아이템명", "description": "가방, 우산 등 소품 디테일", "imageDescription": "English visual description"}
+  ]
 }`;
 
   const userPrompt = `[현재 기상 및 착장 조건 (요청 ID: ${Date.now()})]
@@ -213,6 +214,9 @@ export async function generateOotdWithDeepSeek(
     }
 
     const parsed = cleanAndParseJson(rawContent);
+    if (!Array.isArray(parsed.items) || parsed.items.length === 0) {
+      throw new Error('추천 아이템이 응답에 없습니다.');
+    }
 
     // 아이템 정규화
     const items: OutfitItem[] = (parsed.items || []).map((item: any, idx: number) => ({
@@ -220,20 +224,22 @@ export async function generateOotdWithDeepSeek(
       category: item.category || 'top',
       name: item.name || '추천 아이템',
       description: item.description || '',
+      imageDescription: item.imageDescription || '',
       iconName: getCategoryIcon(item.category || 'top', item.name || ''),
     }));
 
-    // [핵심] TheHive Flux Schnell을 이용한 실시간 실사 화보 이미지 동시 생성 시도
+    // 화면에 표시하는 동일한 아이템 목록으로 이미지 생성 지시문을 구성합니다.
+    const imagePrompt = buildItemImagePrompt(items, gender);
     let finalImageUrl: any = selectBestPresetImageForAi(gender, weather, tpo);
-    if (parsed.imagePrompt) {
-      try {
-        const fluxResult = await generateFashionImageWithFlux(parsed.imagePrompt, 20000);
-        if (fluxResult.success && fluxResult.imageUrl) {
-          finalImageUrl = fluxResult.imageUrl;
-        }
-      } catch (fluxErr) {
-        console.warn('Flux 실시간 이미지 생성 실패 -> 고화질 룩북 프리셋 폴백:', fluxErr);
+    let imageGenerationFailed = true;
+    try {
+      const fluxResult = await generateFashionImageWithFlux(imagePrompt, 20000);
+      if (fluxResult.success && fluxResult.imageUrl) {
+        finalImageUrl = fluxResult.imageUrl;
+        imageGenerationFailed = false;
       }
+    } catch (fluxErr) {
+      console.warn('Flux 실시간 이미지 생성 실패 -> 고화질 룩북 프리셋 폴백:', fluxErr);
     }
 
     const tempBand = getTemperatureBand(weather.temperature).id;
@@ -248,7 +254,8 @@ export async function generateOotdWithDeepSeek(
       weatherDefenseTags: parsed.weatherDefenseTags || ['#오늘의_OOTD', '#실시간_추천'],
       imageUrl: finalImageUrl,
       items,
-      imageSource: 'ai',
+      imageSource: imageGenerationFailed ? 'preset' : 'ai',
+      imageGenerationFailed,
       generatedAt: new Date().toISOString(),
     };
 
@@ -258,7 +265,7 @@ export async function generateOotdWithDeepSeek(
       styleDescription: parsed.styleDescription,
       weatherDefenseTags: parsed.weatherDefenseTags,
       items,
-      imagePrompt: parsed.imagePrompt,
+      imagePrompt,
       lookbook: aiLookbook,
     };
   } catch (error: any) {

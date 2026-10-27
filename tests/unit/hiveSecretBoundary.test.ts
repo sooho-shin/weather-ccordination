@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 import { onRequestPost as fluxPost } from '../../functions/api/ai/flux';
 import { onRequestPost as deepseekPost } from '../../functions/api/ai/deepseek';
+import { buildItemImagePrompt } from '../../src/utils/promptBuilder';
 
 for (const [name, handler] of [['flux', fluxPost], ['deepseek', deepseekPost]] as const) {
   test(`${name}: missing server secret fails without contacting Hive`, async () => {
@@ -53,7 +54,8 @@ function loadClient(file: string, platform: string, fetch: typeof globalThis.fet
       if (id.includes('framingStandards')) return { MASTER_FULLBODY_PROMPT_DIRECTIVE: 'Full body.' };
       if (id.includes('temperatureBands')) return { getTemperatureBand: () => ({ id: 'mild' }) };
       if (id.includes('presetLookbooks')) return { findMatchingLookbooks: () => [{ imageUrl: 'preset.jpg' }] };
-      if (id.includes('fluxService')) return {};
+      if (id.includes('fluxService')) return { generateFashionImageWithFlux: async () => ({ success: false }) };
+      if (id.includes('promptBuilder')) return { buildItemImagePrompt };
       throw new Error('Unexpected dependency');
     },
   };
@@ -82,7 +84,7 @@ test('web DeepSeek is configured without client key and sends only proxy request
     calls++;
     assert.equal(url, '/api/ai/deepseek');
     assert.equal(new Headers(options?.headers).has('Authorization'), false);
-    return new Response(JSON.stringify({ choices: [{ message: { content: '{"styleTitle":"Test","items":[]}' } }] }));
+    return new Response(JSON.stringify({ choices: [{ message: { content: '{"styleTitle":"Test","items":[{"category":"top","name":"셔츠"}]}' } }] }));
   });
   assert.equal(client.isDeepSeekConfigured(), true);
   assert.equal('apiKey' in client.getDeepSeekConfig(), false);

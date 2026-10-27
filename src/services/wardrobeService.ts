@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { OutfitLookbook } from '../types/outfit';
 import { WeatherData } from '../types/weather';
 
@@ -23,6 +22,9 @@ export async function saveOutfitToWardrobe(
     weatherDefenseTags: outfit.weatherDefenseTags || [],
     items: outfit.items || [],
     imageUrl: outfit.imageUrl,
+    imageSource: outfit.imageSource,
+    imageGenerationFailed: outfit.imageGenerationFailed,
+    generatedAt: outfit.generatedAt,
   };
 
   try {
@@ -98,7 +100,7 @@ function syncToLocalStorage(outfit: OutfitLookbook) {
       const filtered = list.filter((item) => item.id !== outfit.id);
       filtered.unshift(outfit);
       window.localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify(filtered));
-    } catch {}
+    } catch { /* 로컬 백업이 불가능해도 서버 저장 결과는 유지합니다. */ }
   }
 }
 
@@ -108,7 +110,7 @@ function removeFromLocalStorage(id: string) {
       const list = getLocalStorageOutfits();
       const filtered = list.filter((item) => item.id !== id);
       window.localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify(filtered));
-    } catch {}
+    } catch { /* 저장소 접근 실패 시 서버 삭제 결과를 유지합니다. */ }
   }
 }
 
@@ -117,7 +119,7 @@ function getLocalStorageOutfits(): OutfitLookbook[] {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY_FALLBACK);
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch { /* 손상된 로컬 캐시는 빈 옷장으로 처리합니다. */ }
   }
   return [];
 }

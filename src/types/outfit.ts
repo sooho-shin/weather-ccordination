@@ -10,6 +10,7 @@ export interface OutfitItem {
   name: string;
   iconName: string; // Expo vector icon name (e.g. Ionicons / MaterialCommunityIcons)
   description?: string;
+  imageDescription?: string;
 }
 
 export interface OutfitLookbook {
@@ -24,6 +25,7 @@ export interface OutfitLookbook {
   imageUrl: any;
   items: OutfitItem[];
   imageSource: 'preset' | 'ai';
+  imageGenerationFailed?: boolean;
   generatedAt?: string;
 }
 

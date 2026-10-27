@@ -1,5 +1,25 @@
 import { getTemperatureBand } from '../constants/temperatureBands';
 import { AIOutfitGenerationRequest, OutfitItem } from '../types/outfit';
+import { Gender } from '../types/weather';
+
+export function buildItemImagePrompt(items: OutfitItem[], gender: Gender): string {
+  const checklist = items.map((item) => {
+    const details = [item.name, item.description, item.imageDescription].filter(Boolean).join(' — ');
+    if (item.category !== 'accessory') return `Wear ${details}.`;
+    if (/가방|토트|백|bag|tote|clutch/i.test(details)) {
+      return `Carry ${details} visibly in one hand beside the hip or over the shoulder. Keep the entire bag unobstructed and outside clothing; do not put both hands in pockets.`;
+    }
+    if (/우산|umbrella/i.test(details)) return `Hold ${details} visibly in one hand.`;
+    if (/안경|선글라스|글래스|glasses/i.test(details)) return `Wear ${details} visibly on the face.`;
+    return `Wear ${details} visibly.`;
+  });
+  return [
+    `A stylish 20s Korean ${gender === 'male' ? 'man' : 'woman'} standing upright, full-body head-to-toe fashion photograph.`,
+    'The following item checklist is authoritative. Depict EVERY listed garment, pair of shoes and accessory together on this one model. Match their colors, materials and shapes. Do not omit or substitute items.',
+    ...checklist,
+    'Use a pose that keeps every accessory and both shoes clearly visible. No text or labels in the image.',
+  ].join('\n');
+}
 
 export interface PromptBuildResult {
   prompt: string;
@@ -23,7 +43,7 @@ export function buildOutfitPrompt(request: AIOutfitGenerationRequest): PromptBui
   let outfitDescriptionEn = '';
   let suggestedItems: OutfitItem[] = [];
   const styleTitle = `${styleMood} 룩`;
-  let styleDescription = `${temperature}°C 날씨에 최적화된 감각적인 AI 추천 코디`;
+  const styleDescription = `${temperature}°C 날씨에 최적화된 감각적인 AI 추천 코디`;
 
   if (temperature >= 28) {
     if (gender === 'female') {
@@ -113,6 +133,7 @@ export function buildOutfitPrompt(request: AIOutfitGenerationRequest): PromptBui
     `Ultra-realistic 8k full-body head-to-toe fashion editorial photograph of a ${genderEn}`,
     `standing upright naturally outdoors, centered in 9:16 vertical frame, ${outfitDescriptionEn}`,
     `Weather and mood: ${weatherAtmosphere}, temperature feeling around ${temperature}°C (${tempBand.summary})`,
+    buildItemImagePrompt(suggestedItems, gender),
     'Full body visible from head to toe, entire shoes and feet fully visible on the ground, eye-level straight frontal angle, no close-up, no cropped feet, no cropped head, sharp authentic fabric textures and seams, hyper-realistic, 8k resolution, cinematic composition',
   ].join(', ');
 
