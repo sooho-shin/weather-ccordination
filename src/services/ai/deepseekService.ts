@@ -194,7 +194,8 @@ export async function generateOotdWithDeepSeek(
           { role: 'user', content: userPrompt },
         ],
         temperature: 0.85,
-        max_tokens: 2500,
+        reasoning_effort: 'none',
+        max_completion_tokens: 2500,
       }),
       signal: controller.signal,
     });

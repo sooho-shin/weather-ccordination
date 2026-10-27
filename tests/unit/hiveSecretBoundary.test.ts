@@ -85,6 +85,7 @@ test('web DeepSeek is configured without client key and sends only proxy request
     calls++;
     assert.equal(url, '/api/ai/deepseek');
     assert.equal(new Headers(options?.headers).has('Authorization'), false);
+    assert.equal(JSON.parse(String(options?.body)).reasoning_effort, 'none');
     return new Response(JSON.stringify({ choices: [{ message: { content: '{"styleTitle":"Test","items":[{"category":"top","name":"셔츠"}]}' } }] }));
   });
   assert.equal(client.isDeepSeekConfigured(), true);
