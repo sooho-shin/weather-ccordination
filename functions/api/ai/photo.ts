@@ -10,7 +10,7 @@ export async function onRequestPost(context: any) {
     }
     const denied = await reserveUsage(context, 'photo');
     if (denied) return denied;
-    const response = await fetch(source, { redirect: 'error', signal: AbortSignal.timeout(10000) });
+    const response = await fetch(source.href, { redirect: 'manual', signal: AbortSignal.timeout(10000) });
     if (!response.ok || !/^image\/(png|jpeg|webp)(;|$)/.test(response.headers.get('Content-Type') || '')) return json({ error: '사진을 가져오지 못했어요. 사진을 다시 생성한 뒤 저장해 주세요.' }, 502);
     const reader = response.body?.getReader();
     if (!reader) return json({ error: '사진 내용이 없습니다.' }, 502);
@@ -30,6 +30,7 @@ export async function onRequestPost(context: any) {
     return new Response(bytes, { headers: { 'Content-Type': response.headers.get('Content-Type')!, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
   } catch (error) {
     if (error instanceof Response) return error;
+    console.warn('Photo preservation failed', error instanceof Error ? error.name : 'UnknownError');
     return json({ error: '사진을 보관하지 못했어요. 잠시 후 다시 시도해 주세요.' }, 502);
   }
 }

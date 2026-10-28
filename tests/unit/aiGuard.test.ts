@@ -106,7 +106,7 @@ test('photo bytes are copied without CORS or AI charges and large images are rej
   const url = 'https://hive-data-prod-cdn.thehive.ai/image_generation/test/photo.jpg';
   try {
     globalThis.fetch = async (_url, options) => {
-      assert.equal(options?.redirect, 'error');
+      assert.equal(options?.redirect, 'manual');
       return new Response('photo', { headers: { 'Content-Type': 'image/jpeg' } });
     };
     const result = await copyPhoto(await context(db, { url }));
@@ -115,6 +115,8 @@ test('photo bytes are copied without CORS or AI charges and large images are rej
     assert.equal(result.headers.get('Cache-Control'), 'no-store');
     assert.equal((await db.query('SELECT COUNT(*) AS count FROM ai_usage', [])).results[0].count, 0);
     assert.equal((await db.query('SELECT COUNT(*) AS count FROM photo_usage', [])).results[0].count, 1);
+    globalThis.fetch = async () => new Response(null, { status: 302, headers: { Location: 'http://127.0.0.1/private' } });
+    assert.equal((await copyPhoto(await context(db, { url }))).status, 502);
     globalThis.fetch = async () => new Response(new Uint8Array(4 * 1024 * 1024 + 1), { headers: { 'Content-Type': 'image/png' } });
     assert.equal((await copyPhoto(await context(db, { url }))).status, 413);
   } finally { globalThis.fetch = previous; }

@@ -125,7 +125,10 @@ export async function handleAiRequest(context: any, kind: AiKind) {
       method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${context.env.HIVE_SECRET_KEY}` },
       body: JSON.stringify(payload), signal: AbortSignal.timeout(25000),
     });
-    if (!upstream.ok) return json({ error: 'AI 생성 서비스가 일시적으로 응답하지 않아요. 잠시 후 다시 시도해 주세요.' }, upstream.status === 429 ? 429 : 502);
+    if (!upstream.ok) {
+      console.warn('AI upstream rejected request', kind, upstream.status);
+      return json({ error: 'AI 생성 서비스가 일시적으로 응답하지 않아요. 잠시 후 다시 시도해 주세요.' }, upstream.status === 429 ? 429 : 502);
+    }
     return new Response(await upstream.text(), { headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof Response) return error;
