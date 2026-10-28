@@ -18,23 +18,28 @@ interface WardrobeModalProps {
   visible: boolean;
   onClose: () => void;
   onApplyOutfit: (outfit: OutfitLookbook) => void;
+  onDeleteOutfit?: (id: string) => void;
 }
 
 export const WardrobeModal: React.FC<WardrobeModalProps> = ({
   visible,
   onClose,
   onApplyOutfit,
+  onDeleteOutfit,
 }) => {
   const [outfits, setOutfits] = useState<OutfitLookbook[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadWardrobe = async () => {
     setLoading(true);
+    setErrorMessage(null);
     try {
       const data = await fetchWardrobeOutfits();
       setOutfits(data);
-    } catch (err) {
+    } catch (err: any) {
       console.warn('옷장 불러오기 오류:', err);
+      setErrorMessage(err?.message || '옷장을 불러오지 못했어요.');
     } finally {
       setLoading(false);
     }
@@ -51,6 +56,9 @@ export const WardrobeModal: React.FC<WardrobeModalProps> = ({
     const success = await deleteOutfitFromWardrobe(id);
     if (success) {
       setOutfits((prev) => prev.filter((item) => item.id !== id));
+      onDeleteOutfit?.(id);
+    } else {
+      setErrorMessage('코디를 삭제하지 못했어요. 브라우저 저장 설정을 확인해 주세요.');
     }
   };
 
@@ -76,8 +84,9 @@ export const WardrobeModal: React.FC<WardrobeModalProps> = ({
           </View>
 
           <Text style={styles.subtitle}>
-            Cloudflare D1 데이터베이스와 R2 스토리지에 영구 보관된 나만의 코디 화보입니다.
+            이 브라우저에 사진과 코디를 보관해요. 다른 기기와 동기화되지 않으며 브라우저 데이터를 지우면 삭제돼요.
           </Text>
+          {!!errorMessage && <Text style={styles.errorText} accessibilityRole="alert">{errorMessage}</Text>}
 
           {/* 목록 영역 */}
           {loading ? (
@@ -157,6 +166,7 @@ export const WardrobeModal: React.FC<WardrobeModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  errorText: { color: '#B42318', fontSize: 13, paddingBottom: 12 },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.72)',

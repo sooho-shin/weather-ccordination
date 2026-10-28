@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, View, SafeAreaView, TouchableOpacity, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
 import { Gender, WeatherData, WeatherState } from './src/types/weather';
-import { OutfitLookbook, TpoCategory } from './src/types/outfit';
+import { OutfitLookbook, TpoCategory, GenerationStage } from './src/types/outfit';
 import { getTemperatureBand } from './src/constants/temperatureBands';
 import { findMatchingLookbooks } from './src/data/presetLookbooks';
 import { getCurrentLocation, getCachedLocation } from './src/services/locationService';
@@ -18,12 +18,13 @@ import { StyleGuideSheet } from './src/components/StyleGuideSheet';
 import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
 import { WardrobeModal } from './src/components/WardrobeModal';
-import { generateOotdWithDeepSeek, isDeepSeekConfigured } from './src/services/ai/deepseekService';
-import { saveOutfitToWardrobe } from './src/services/wardrobeService';
+import { generateOotdWithDeepSeek, retryLookbookImage } from './src/services/ai/deepseekService';
+import { saveOutfitToWardrobe, fetchWardrobeOutfits } from './src/services/wardrobeService';
+import { matchesLookbookContext, matchesLookbookWeather } from './src/utils/lookbookContext';
 
 export default function App() {
   // 0. 웹 및 네이티브 폰트 안전 로드
-  const [fontsLoaded] = useFonts({
+  useFonts({
     Ionicons: require('./assets/fonts/Ionicons.ttf'),
   });
 
@@ -78,7 +79,14 @@ export default function App() {
   const [isWeatherReady, setIsWeatherReady] = useState(() => Boolean(getCachedWeather()));
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [aiCustomLookbook, setAiCustomLookbook] = useState<OutfitLookbook | null>(null);
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [generationStage, setGenerationStage] = useState<GenerationStage>(null);
+  const isAiGenerating = generationStage !== null;
+  const generationLocked = useRef(false);
+  const savingLocked = useRef(false);
+  const loadedImage = useRef<{ id: string; source: unknown; uri: string } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [operationNotice, setOperationNotice] = useState<string | null>(null);
 
   const [simulatorVisible, setSimulatorVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
@@ -118,18 +126,23 @@ export default function App() {
 
     // 사용자가 커스텀 생성한 AI 룩북이 있을 때 현재 TPO나 성별 조건과 부합하면 맨 앞 배치
     if (aiCustomLookbook) {
-      const isGenderMatch = gender === 'all' || aiCustomLookbook.gender === gender;
-      const isTpoMatch = !aiCustomLookbook.tpo || aiCustomLookbook.tpo === selectedTpo;
-      if (isGenderMatch && isTpoMatch) {
+      if (matchesLookbookContext(aiCustomLookbook, weather, gender, selectedTpo)) {
         return [aiCustomLookbook, ...presets];
       }
     }
     return presets;
-  }, [gender, currentTempBand, weather.weatherState, selectedTpo, aiCustomLookbook]);
+  }, [gender, currentTempBand, weather, selectedTpo, aiCustomLookbook]);
 
   // 슬라이드 인덱스 범위 초과 방지
   const safeIndex = activeSlideIndex >= availableLookbooks.length ? 0 : activeSlideIndex;
   const currentLookbook = availableLookbooks[safeIndex] || availableLookbooks[0];
+  const latestContext = useRef({ weather, gender, selectedTpo, lookbookId: currentLookbook?.id });
+  latestContext.current = { weather, gender, selectedTpo, lookbookId: currentLookbook?.id };
+
+  useEffect(() => {
+    fetchWardrobeOutfits().then((list) => setSavedOutfitIds(new Set(list.map((item) => item.id)))).catch(() => {});
+  }, []);
+
 
   // 성별 변경 핸들러
   const handleSelectGender = (newGender: Gender) => {
@@ -215,51 +228,96 @@ export default function App() {
     }
   }, [handleNextLookbook, handlePrevLookbook]);
 
-  // AI 생성 완료 핸들러
-  const handleGenerationSuccess = (newLookbook: OutfitLookbook) => {
-    setAiCustomLookbook(newLookbook);
-    setActiveSlideIndex(0);
-  };
-
-  // 내 옷장 (D1 + R2) 코디 저장 핸들러
   const handleSaveCurrentOutfit = useCallback(async () => {
-    if (!currentLookbook) return;
+    if (!currentLookbook || savingLocked.current) return;
+    savingLocked.current = true;
+    setIsSaving(true);
+    setOperationNotice(null);
     try {
-      const res = await saveOutfitToWardrobe(currentLookbook, weather);
-      if (res.success) {
+      const resolved = loadedImage.current;
+      const result = await saveOutfitToWardrobe({ ...currentLookbook,
+        imageUrl: resolved?.id === currentLookbook.id && resolved.source === currentLookbook.imageUrl ? resolved.uri : currentLookbook.imageUrl,
+      });
+      if (result.success) {
         setSavedOutfitIds((prev) => new Set(prev).add(currentLookbook.id));
+        setOperationNotice('이 브라우저에 사진과 코디를 저장했어요.');
+      } else {
+        setOperationNotice(result.errorMessage || '코디를 저장하지 못했어요.');
       }
-    } catch (err) {
-      console.warn('옷장 저장 실패:', err);
+    } finally {
+      savingLocked.current = false;
+      setIsSaving(false);
     }
-  }, [currentLookbook, weather]);
+  }, [currentLookbook]);
 
-  // 옷장에서 선택한 코디를 메인 배경에 적용
   const handleApplyWardrobeOutfit = useCallback((outfit: OutfitLookbook) => {
+    if (!matchesLookbookWeather(outfit, weather)) {
+      setOperationNotice('저장한 코디의 기온대·날씨가 현재와 달라 적용하지 않았어요. 현재 날씨로 새 코디를 생성해 주세요.');
+      return;
+    }
+    setGender(outfit.gender);
+    setSelectedTpo(outfit.tpo || 'daily');
     setAiCustomLookbook(outfit);
     setActiveSlideIndex(0);
-  }, []);
+  }, [weather]);
 
-  // 실시간 TheHive DeepSeek V4.1 AI 코디 추천 생성 핸들러
-  const handleQuickAiRecommend = useCallback(async () => {
-    if (isAiGenerating) return;
-    setIsAiGenerating(true);
+  const handleGenerate = useCallback(async (mood?: string) => {
+    if (generationLocked.current) return;
+    generationLocked.current = true;
+    setGenerationStage('recommendation');
+    setAiError(null);
+    setOperationNotice(null);
+    const started = latestContext.current;
+    const targetTpo = mood ? (mood === '클래식 포멀' ? 'office' : mood === '시크 스트릿' ? 'street' : 'daily') : started.selectedTpo;
     try {
-      const targetGender = gender === 'all' ? 'female' : gender;
-      const res = await generateOotdWithDeepSeek(weather, selectedTpo, targetGender);
-      if (res.success && res.lookbook) {
-        setAiCustomLookbook(res.lookbook);
-        setActiveSlideIndex(0);
-      } else {
+      const result = await generateOotdWithDeepSeek(started.weather, targetTpo, started.gender === 'all' ? 'female' : started.gender, mood, setGenerationStage);
+      if (!result.success || !result.lookbook) {
+        setAiError(result.errorMessage || '코디를 생성하지 못했어요. 다시 시도해 주세요.');
         setAiModalVisible(true);
+        return;
       }
-    } catch (err) {
-      console.warn('AI 추천 실패:', err);
+      const latest = latestContext.current;
+      if (latest.selectedTpo !== started.selectedTpo || !matchesLookbookContext(result.lookbook, latest.weather, latest.gender, targetTpo)) {
+        setOperationNotice('생성 중 날씨나 선택 조건이 바뀌었어요. 현재 조건으로 다시 생성해 주세요.');
+        return;
+      }
+      setSelectedTpo(targetTpo);
+      setAiCustomLookbook(result.lookbook);
+      setActiveSlideIndex(0);
+      setAiModalVisible(false);
+    } catch {
+      setAiError('코디를 작성하지 못했어요. 잠시 후 다시 시도해 주세요.');
       setAiModalVisible(true);
     } finally {
-      setIsAiGenerating(false);
+      generationLocked.current = false;
+      setGenerationStage(null);
     }
-  }, [isAiGenerating, weather, selectedTpo, gender]);
+  }, []);
+
+  const handleRetryImage = useCallback(async () => {
+    if (!currentLookbook || generationLocked.current) return;
+    generationLocked.current = true;
+    setGenerationStage('image');
+    setAiError(null);
+    setOperationNotice(null);
+    try {
+      const updated = await retryLookbookImage(currentLookbook, setGenerationStage);
+      const latest = latestContext.current;
+      if (latest.lookbookId !== currentLookbook.id || !matchesLookbookContext(updated, latest.weather, latest.gender, latest.selectedTpo)) {
+        setOperationNotice('생성 중 날씨나 선택 코디가 바뀌었어요. 현재 코디에서 다시 시도해 주세요.');
+        return;
+      }
+      setAiCustomLookbook(updated);
+      if (!updated.imageGenerationFailed) {
+        setSavedOutfitIds((prev) => { const next = new Set(prev); next.delete(updated.id); return next; });
+      }
+    } catch {
+      setOperationNotice('사진을 다시 생성하지 못했어요. 추천 코디는 그대로 유지됩니다.');
+    } finally {
+      generationLocked.current = false;
+      setGenerationStage(null);
+    }
+  }, [currentLookbook]);
 
   return (
     <View style={styles.container}>
@@ -267,7 +325,9 @@ export default function App() {
 
       {/* 1. 풀스크린 실사 배경 화보 */}
       {currentLookbook && (
-        <FullscreenBackground imageUrl={currentLookbook.imageUrl} />
+        <FullscreenBackground imageUrl={currentLookbook.imageUrl} onImageReady={(uri) => {
+          loadedImage.current = { id: currentLookbook.id, source: currentLookbook.imageUrl, uri };
+        }} />
       )}
 
       {/* 2. 안전 영역 내 오버레이 UI */}
@@ -321,10 +381,14 @@ export default function App() {
             onSelectIndex={(index) => setActiveSlideIndex(index)}
             onShuffle={handleShuffleLookbook}
             onOpenAIGenerator={() => setAiModalVisible(true)}
-            onQuickAiGenerate={handleQuickAiRecommend}
+            onQuickAiGenerate={() => { void handleGenerate(); }}
             onSaveToWardrobe={handleSaveCurrentOutfit}
             isSavedToWardrobe={Boolean(currentLookbook && savedOutfitIds.has(currentLookbook.id))}
             isAiGenerating={isAiGenerating}
+            generationStage={generationStage}
+            onRetryImage={handleRetryImage}
+            notice={operationNotice || aiError}
+            isSaving={isSaving}
             isAiGenerated={currentLookbook.imageSource === 'ai'}
           />
         )}
@@ -344,13 +408,16 @@ export default function App() {
         weather={weather}
         gender={gender === 'all' ? 'female' : gender}
         onClose={() => setAiModalVisible(false)}
-        onGenerationSuccess={handleGenerationSuccess}
+        stage={generationStage}
+        errorMessage={aiError || operationNotice}
+        onGenerate={handleGenerate}
       />
 
       <WardrobeModal
         visible={wardrobeVisible}
         onClose={() => setWardrobeVisible(false)}
         onApplyOutfit={handleApplyWardrobeOutfit}
+        onDeleteOutfit={(id) => setSavedOutfitIds((prev) => { const next = new Set(prev); next.delete(id); return next; })}
       />
     </View>
   );

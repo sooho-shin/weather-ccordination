@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { MASTER_FULLBODY_PROMPT_DIRECTIVE } from '../../constants/framingStandards';
+import { ensureAiSession, aiErrorMessage } from './session';
 
 export interface FluxGenerationResult {
   success: boolean;
@@ -21,9 +22,10 @@ export async function generateFashionImageWithFlux(
   }
   const endpoint = '/api/ai/flux';
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    await ensureAiSession(controller.signal);
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -48,11 +50,8 @@ export async function generateFashionImageWithFlux(
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Flux Schnell API error (${response.status}): ${errText}`);
+      throw new Error(await aiErrorMessage(response));
     }
 
     const data = await response.json();
@@ -70,7 +69,9 @@ export async function generateFashionImageWithFlux(
     console.warn('TheHive Flux Schnell 생성 실패, 프리셋 화보로 폴백:', error);
     return {
       success: false,
-      errorMessage: error?.message || 'Flux 이미지 생성 실패',
+      errorMessage: error?.name === 'AbortError' ? '이미지 생성 시간이 초과됐어요. 사진만 다시 생성해 주세요.' : error?.message || 'Flux 이미지 생성 실패',
     };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

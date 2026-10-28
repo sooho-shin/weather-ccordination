@@ -6,6 +6,7 @@ import ts from 'typescript';
 import { onRequestPost as fluxPost } from '../../functions/api/ai/flux';
 import { onRequestPost as deepseekPost } from '../../functions/api/ai/deepseek';
 import { buildItemImagePrompt } from '../../src/utils/promptBuilder';
+import { createSession } from '../../functions/lib/aiGuard';
 
 for (const [name, handler] of [['flux', fluxPost], ['deepseek', deepseekPost]] as const) {
   test(`${name}: missing server secret fails without contacting Hive`, async () => {
@@ -32,9 +33,17 @@ for (const [name, handler] of [['flux', fluxPost], ['deepseek', deepseekPost]] a
       return new Response('{"ok":true}', { status: 200 });
     };
     try {
+      const session = await createSession(new Request('https://example.test'), 'session-test-secret');
+      const payload = name === 'flux' ? { input: { prompt: 'test', num_images: 1 } } : {
+        model: 'deepseek-ai/deepseek-v4.1-flash-1017', messages: [{ role: 'system', content: 'test' }, { role: 'user', content: 'test' }],
+      };
       const response = await handler({
-        request: new Request('https://example.test', { method: 'POST', body: '{}' }),
-        env: { HIVE_SECRET_KEY: 'test-server-only' },
+        request: new Request('https://example.test', { method: 'POST', body: JSON.stringify(payload), headers: {
+          'Content-Type': 'application/json', Origin: 'https://example.test', Cookie: session.headers.get('Set-Cookie')!.split(';')[0], 'CF-Connecting-IP': '192.0.2.1',
+        } }),
+        env: { HIVE_SECRET_KEY: 'test-server-only', AI_SESSION_SECRET: 'session-test-secret', AI_LIMITS: {
+          prepare: () => ({ bind: () => ({ all: async () => ({ results: [{ id: 'test' }] }) }) }),
+        } },
       });
       assert.equal(response.status, 200);
       assert.equal(calls, 1);
@@ -56,6 +65,7 @@ function loadClient(file: string, platform: string, fetch: typeof globalThis.fet
       if (id.includes('presetLookbooks')) return { findMatchingLookbooks: () => [{ imageUrl: 'preset.jpg' }] };
       if (id.includes('fluxService')) return { generateFashionImageWithFlux: async () => ({ success: false }) };
       if (id.includes('promptBuilder')) return { buildItemImagePrompt };
+      if (id === './session') return { ensureAiSession: async () => {}, aiErrorMessage: async () => 'test error' };
       throw new Error('Unexpected dependency');
     },
   };

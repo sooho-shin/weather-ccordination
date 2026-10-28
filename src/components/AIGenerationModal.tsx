@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,17 +8,17 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { defaultImageGenerationService } from '../services/ai/envImageGenerationService';
-import { generateOotdWithDeepSeek, isDeepSeekConfigured } from '../services/ai/deepseekService';
 import { Gender, WeatherData } from '../types/weather';
-import { OutfitLookbook } from '../types/outfit';
+import { GenerationStage } from '../types/outfit';
 
 interface AIGenerationModalProps {
   visible: boolean;
   weather: WeatherData;
   gender: Gender;
   onClose: () => void;
-  onGenerationSuccess: (newLookbook: OutfitLookbook) => void;
+  stage: GenerationStage;
+  errorMessage: string | null;
+  onGenerate: (mood: string) => Promise<void>;
 }
 
 const STYLE_MOODS = ['캐주얼', '모던 미니멀', '시크 스트릿', '클래식 포멀'];
@@ -28,60 +28,15 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
   weather,
   gender,
   onClose,
-  onGenerationSuccess,
+  stage,
+  errorMessage,
+  onGenerate,
 }) => {
   const [selectedMood, setSelectedMood] = useState(STYLE_MOODS[0]);
-  const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(20);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const loading = stage !== null;
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    if (loading && countdown > 0) {
-      timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [loading, countdown]);
-
-  const handleStartGenerate = async () => {
-    setLoading(true);
-    setCountdown(20);
-    setErrorMessage(null);
-
-    try {
-      // 1. DeepSeek API가 설정되어 있는 경우 지능형 코디 엔진 우선 시도
-      if (isDeepSeekConfigured()) {
-        const targetTpo =
-          selectedMood === '클래식 포멀' ? 'office' : selectedMood === '시크 스트릿' ? 'street' : 'daily';
-        const dsResult = await generateOotdWithDeepSeek(weather, targetTpo, gender, selectedMood);
-
-        if (dsResult.success && dsResult.lookbook) {
-          onGenerationSuccess(dsResult.lookbook);
-          onClose();
-          return;
-        }
-      }
-
-      // 2. 기본 이미지 생성 서비스 호출 (OpenAI / Fal / Mock 안전 폴백)
-      const result = await defaultImageGenerationService.generateOutfit({
-        gender,
-        temperature: weather.temperature,
-        weatherState: weather.weatherState,
-        precipitation: weather.precipitation,
-        styleMood: selectedMood,
-      });
-
-      if (result.lookbook) {
-        onGenerationSuccess(result.lookbook);
-        onClose();
-      } else {
-        setErrorMessage(result.errorMessage || 'AI 코디 생성에 실패했습니다.');
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || '요청 처리 중 오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
+  const handleStartGenerate = () => {
+    if (!loading) void onGenerate(selectedMood);
   };
 
   return (
@@ -89,7 +44,7 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={loading ? () => {} : onClose}
     >
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
@@ -143,17 +98,15 @@ export const AIGenerationModal: React.FC<AIGenerationModalProps> = ({
             <View style={styles.loadingBox}>
               <ActivityIndicator size="large" color="#007AFF" />
               <Text style={styles.loadingText}>
-                오늘 날씨에 맞춘 실사 화보를 생성하고 있습니다...
+                {stage === 'recommendation' ? '날씨와 스타일에 맞는 코디를 작성하고 있어요...' : '추천 아이템으로 사진을 생성하고 있어요...'}
               </Text>
-              <Text style={styles.countdownText}>
-                타임아웃까지 {countdown}초 남음
-              </Text>
+
             </View>
           ) : (
             <View style={styles.infoBox}>
               <Ionicons name="information-circle-outline" size={16} color="#007AFF" />
               <Text style={styles.infoText}>
-                API Key가 없는 경우에도 안전한 고품질 A컷 시뮬레이션으로 즉시 테스트할 수 있습니다.
+                이 브라우저에서 코디 작성과 사진 생성은 각각 하루 10회까지 이용할 수 있어요. 사진 재시도도 생성 횟수에 포함돼요.
               </Text>
             </View>
           )}
@@ -285,10 +238,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1C1C1E',
     marginTop: 6,
-  },
-  countdownText: {
-    fontSize: 12,
-    color: '#8E8E93',
   },
   errorText: {
     fontSize: 12,

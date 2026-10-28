@@ -12,8 +12,8 @@
 | **AC-06** | 하단 글래스모피즘 코디 가이드 시트 (아우터, 상의, 하의, 신발 칩) | [`src/components/StyleGuideSheet.tsx`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/components/StyleGuideSheet.tsx), [`OutfitItemCard.tsx`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/components/OutfitItemCard.tsx) | 목업 UI 100% 매칭 및 expo-blur 적용 | **구현 완료** |
 | **AC-07** | GPS 위치 자동 조회 및 거부 시 서울 기본 위치 폴백 | [`src/services/locationService.ts`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/services/locationService.ts) | `expo-location` 권한 흐름 및 기본 서울 좌표 반환 | **구현 완료** |
 | **AC-08** | 계절/날씨 시뮬레이션 모드 지원 (영하, 한여름, 비 등) | [`src/components/WeatherSimulatorModal.tsx`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/components/WeatherSimulatorModal.tsx) | 시나리오 원클릭 변경 및 기온 미세 조절 기능 | **구현 완료** |
-| **AC-09** | 온디맨드 AI 생성 아키텍처 분리 (.env 직결 -> 서버리스 전환 대비) | [`src/services/ai/imageGenerationService.ts`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/services/ai/imageGenerationService.ts) | 인터페이스 분리 및 `.env.example` 구성 | **구현 완료** |
-| **AC-10** | 온디맨드 AI 생성 20초 타임아웃 및 실패 시 프리셋 안전 폴백 | [`src/services/ai/envImageGenerationService.ts`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/services/ai/envImageGenerationService.ts), [`AIGenerationModal.tsx`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/components/AIGenerationModal.tsx) | AbortController 20초 타임아웃 및 프리셋 자동 복귀 | **구현 완료** |
+| **AC-09** | 서버 비밀값·세션·원자적 호출 한도로 유료 AI 요청 보호 | [`src/services/ai/imageGenerationService.ts`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/services/ai/imageGenerationService.ts) | 인터페이스 분리 및 `.env.example` 구성 | **구현 완료** |
+| **AC-10** | 단계별 생성 상태·타임아웃·참고 사진 안내·이미지만 재시도 | [`src/services/ai/envImageGenerationService.ts`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/services/ai/envImageGenerationService.ts), [`AIGenerationModal.tsx`](file:///Users/shinsooho/Desktop/practice/weather-coordination/src/components/AIGenerationModal.tsx) | AbortController 20초 타임아웃 및 프리셋 자동 복귀 | **구현 완료** |
 
 ---
 
@@ -24,3 +24,11 @@
 ```bash
 python3 scripts/run_harness.py
 ```
+
+
+## 운영 안정성 검증
+
+- 비용 제한·세션: `tests/unit/aiGuard.test.ts` (병렬 요청, 일일/분별 한도, 쿠키 재발급, 요청 크기·모델·장수 검증).
+- 브라우저 옷장: `tests/unit/wardrobeStorage.test.ts` (사진 데이터 보관, 재조회·삭제, 저장 차단·용량 부족·손상된 데이터 보존).
+- 날씨 정합성: `tests/unit/lookbookContext.test.ts` (기온대·강수 상태·성별·TPO 변경).
+- 생성 진행·재시도: `tests/unit/aiLookbookConsistency.test.ts` (코디 작성→이미지 단계, 기존 아이템을 유지하는 이미지 단독 재시도).

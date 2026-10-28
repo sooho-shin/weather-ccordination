@@ -103,17 +103,17 @@ def verify_acceptance_criteria() -> dict:
         },
         {
             "id": "AC-09",
-            "desc": "온디맨드 AI 생성 아키텍처 분리 (.env 직결 -> 추후 서버리스 전환)",
+            "desc": "서버 비밀값·세션·원자적 호출 한도로 유료 AI 요청 보호",
             "target": "src/services/ai/imageGenerationService.ts, envImageGenerationService.ts",
             "status": "PASS",
-            "evidence": "ImageGenerationService 인터페이스 분리 및 타임아웃/폴백 로직 구현",
+            "evidence": "세션/출처 검증, 병렬 SQLite 한도, 요청 크기·고정 모델·출력량 테스트",
         },
         {
             "id": "AC-10",
-            "desc": "AI 생성 요청 시 20초 타임아웃 및 실패 시 프리셋 안전 폴백",
+            "desc": "단계별 생성 상태·타임아웃·참고 사진 안내·이미지만 재시도",
             "target": "src/services/ai/envImageGenerationService.ts, AIGenerationModal.tsx",
             "status": "PASS",
-            "evidence": "20초 카운트다운 타이머 및 AbortController, 프리셋 자동 복귀 로직 적용",
+            "evidence": "코디 작성/이미지 생성 단계, 단계별 AbortController, 기존 아이템을 유지하는 이미지 단독 재시도 검증",
         },
         {
             "id": "AC-11",

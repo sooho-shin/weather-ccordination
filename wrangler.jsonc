@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dize-weather",
+  "account_id": "fdb32e3d499c265dd7e397c96fc927dd",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2026-10-28",
+  "d1_databases": [{
+    "binding": "AI_LIMITS",
+    "database_name": "dize-ai-limits",
+    "database_id": "7d712b85-8dfa-4d10-b69d-4e7cf07811ed"
+  }]
+}

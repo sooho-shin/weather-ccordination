@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
-import { OutfitLookbook } from '../types/outfit';
+import { OutfitLookbook, GenerationStage } from '../types/outfit';
 import { OutfitItemCard } from './OutfitItemCard';
 
 interface StyleGuideSheetProps {
@@ -25,6 +25,10 @@ interface StyleGuideSheetProps {
   isSavedToWardrobe?: boolean;
   isAiGenerating?: boolean;
   isAiGenerated?: boolean;
+  generationStage?: GenerationStage;
+  onRetryImage?: () => void;
+  notice?: string | null;
+  isSaving?: boolean;
 }
 
 export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
@@ -39,6 +43,10 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   isSavedToWardrobe = false,
   isAiGenerating = false,
   isAiGenerated = false,
+  generationStage = null,
+  onRetryImage,
+  notice,
+  isSaving = false,
 }) => {
   const defenseTags = lookbook.weatherDefenseTags || ['#오늘의_OOTD', '#날씨맞춤'];
 
@@ -69,10 +77,19 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
         </View>
 
         {lookbook.imageGenerationFailed && (
-          <Text style={styles.imageNotice} accessibilityRole="alert">
-            이미지 생성에 실패해 기존 사진으로 대체했어요. 사진은 참고용이며 추천 아이템과 다를 수 있어요.
-          </Text>
+          <View style={styles.imageNotice}>
+            <Text style={styles.noticeText} accessibilityRole="alert">
+              {lookbook.imageGenerationError ? `${lookbook.imageGenerationError}\n` : ''}
+              이미지 생성에 실패해 기존 사진으로 대체했어요. 사진은 참고용이며 추천 아이템과 다를 수 있어요.
+            </Text>
+            {onRetryImage && (
+              <TouchableOpacity onPress={onRetryImage} disabled={isAiGenerating} accessibilityRole="button">
+                <Text style={styles.retryText}>{generationStage === 'image' ? '사진 생성 중...' : '사진만 다시 생성'}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
+        {!!notice && <Text style={styles.noticeText} accessibilityRole="alert">{notice}</Text>}
 
         {/* 2. 날씨 방어 태그 영역 (기획서 핵심: #우산_필수, #밝은바지_금지 등) */}
         <View style={styles.defenseTagsRow}>
@@ -133,7 +150,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
                 <Ionicons name="sparkles" size={13} color="#FF9500" />
               )}
               <Text style={styles.aiButtonLabel}>
-                {isAiGenerating ? 'AI 분석중...' : 'AI 맞춤'}
+                {isAiGenerating ? (generationStage === 'image' ? '이미지 생성 중...' : '코디 작성 중...') : 'AI 맞춤'}
               </Text>
             </TouchableOpacity>
 
@@ -142,6 +159,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
               <TouchableOpacity
                 style={[styles.bookmarkBtn, isSavedToWardrobe && styles.bookmarkBtnActive]}
                 onPress={onSaveToWardrobe}
+                disabled={isSaving}
                 activeOpacity={0.8}
                 accessibilityLabel="내 옷장에 저장"
               >
@@ -151,7 +169,7 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
                   color={isSavedToWardrobe ? '#FF9500' : '#000000'}
                 />
                 <Text style={[styles.bookmarkText, isSavedToWardrobe && styles.bookmarkTextActive]}>
-                  {isSavedToWardrobe ? '보관됨' : '저장'}
+                  {isSaving ? '저장 중...' : isSavedToWardrobe ? '보관됨' : '저장'}
                 </Text>
               </TouchableOpacity>
             )}
@@ -172,6 +190,8 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
 };
 
 const styles = StyleSheet.create({
+  noticeText: { color: '#704400', fontSize: 12, lineHeight: 18 },
+  retryText: { color: '#704400', fontSize: 13, fontWeight: '700', paddingTop: 10 },
   imageNotice: {
     color: '#704400',
     backgroundColor: '#FFF3D6',

@@ -4,9 +4,10 @@ import { Image as ExpoImage } from 'expo-image';
 
 interface FullscreenBackgroundProps {
   imageUrl: any;
+  onImageReady?: (uri: string) => void;
 }
 
-export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imageUrl }) => {
+export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imageUrl, onImageReady }) => {
   const imageSource = typeof imageUrl === 'string' ? { uri: imageUrl } : imageUrl;
 
   return (
@@ -17,6 +18,7 @@ export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imag
           source={imageSource}
           style={styles.image}
           resizeMode="cover"
+          onLoad={(event) => onImageReady?.(event.nativeEvent.source.uri)}
         />
       ) : (
         <ExpoImage

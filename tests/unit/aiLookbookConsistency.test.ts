@@ -19,7 +19,7 @@ const preset = { id: 'preset', imageUrl: 'preset.jpg', items, imageSource: 'pres
 const weather = { temperature: 13, weatherState: 'Clear' };
 type Flux = (prompt: string) => Promise<{ success: boolean; imageUrl?: string }>;
 
-function load(file: string, dependencies: Record<string, unknown>) {
+function load(file: string, dependencies: Record<string, unknown>, fetchOverride?: typeof fetch) {
   const exports: any = {};
   const code = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
@@ -27,11 +27,12 @@ function load(file: string, dependencies: Record<string, unknown>) {
   vm.runInNewContext(code, {
     exports, process: { env: {} }, window: {}, AbortController, setTimeout, clearTimeout,
     console: { ...console, warn: () => {} },
-    fetch: async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
+    fetch: fetchOverride || (async () => new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({
       items, imagePrompt: 'unrelated pink dress',
-    }) } }] })),
+    }) } }] }))),
     require: (id: string) => {
       if (id in dependencies) return dependencies[id];
+      if (id === './session') return { ensureAiSession: async () => {}, aiErrorMessage: async () => 'test error' };
       if (id.includes('promptBuilder')) return { buildItemImagePrompt, buildOutfitPrompt };
       if (id.includes('temperatureBands')) return { getTemperatureBand: () => ({ id: 'mild' }) };
       if (id.includes('presetLookbooks')) return { findMatchingLookbooks: () => [preset] };
@@ -64,6 +65,34 @@ test('every recommended item and accessory pose reaches the image prompt', async
   assert.ok(!sentPrompt.includes('unrelated pink dress'));
   assert.equal(result.lookbook.imageSource, 'ai');
   assert.equal(result.lookbook.imageGenerationFailed, false);
+});
+
+test('image-only retry preserves the recommendation and never calls DeepSeek again', async () => {
+  let recommendationCalls = 0;
+  let imageCalls = 0;
+  const stages: unknown[] = [];
+  const client = load('src/services/ai/deepseekService.ts', {
+    'react-native': { Platform: { OS: 'web' } },
+    './fluxService': { generateFashionImageWithFlux: async () => {
+      imageCalls++;
+      return imageCalls === 1 ? { success: false, errorMessage: 'Temporary failure' } : { success: true, imageUrl: 'retried.jpg' };
+    } },
+  }, async () => {
+    recommendationCalls++;
+    return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ styleTitle: 'Keep this title', items }) } }] }));
+  });
+  const first = await client.generateOotdWithDeepSeek(weather, 'office', 'female', undefined, (stage: unknown) => stages.push(stage));
+  assert.equal(first.lookbook.imageGenerationFailed, true);
+  const retried = await client.retryLookbookImage(first.lookbook);
+  assert.equal(retried.imageGenerationFailed, false);
+  assert.equal(retried.imageUrl, 'retried.jpg');
+  assert.equal(retried.styleTitle, first.lookbook.styleTitle);
+  assert.equal(retried.items, first.lookbook.items);
+  assert.equal(recommendationCalls, 1);
+  assert.equal(imageCalls, 2);
+  assert.equal(stages[0], 'recommendation');
+  assert.ok(stages.includes('image'));
+  assert.equal(stages.at(-1), null);
 });
 
 test('image descriptions stay concise and a scarf mentioning a bag is still worn', () => {
@@ -127,7 +156,7 @@ test('fallback notice is visible only for a failed generation, including when a 
     const tree = ui.StyleGuideSheet({ lookbook: { ...preset, imageGenerationFailed: failed }, currentIndex: 0, totalCount: 1 });
     const notices = collect(tree, (node) => node.props?.accessibilityRole === 'alert');
     assert.equal(notices.length, failed ? 1 : 0);
-    if (failed) assert.match(notices[0].props.children, /이미지 생성에 실패해 기존 사진으로 대체/);
+    if (failed) assert.match([notices[0].props.children].flat().join(''), /이미지 생성에 실패해 기존 사진으로 대체/);
     const badges = collect(tree, (node) => node.props?.children === '기존 사진 · 참고용');
     assert.equal(badges.length, failed ? 1 : 0);
   }

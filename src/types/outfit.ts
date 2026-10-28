@@ -3,6 +3,7 @@ import { Gender, TemperatureBandId, WeatherState } from './weather';
 export type OutfitItemCategory = 'outer' | 'top' | 'bottom' | 'shoes' | 'accessory';
 
 export type TpoCategory = 'office' | 'daily' | 'street';
+export type GenerationStage = 'recommendation' | 'image' | null;
 
 export interface OutfitItem {
   id: string;
@@ -26,6 +27,7 @@ export interface OutfitLookbook {
   items: OutfitItem[];
   imageSource: 'preset' | 'ai';
   imageGenerationFailed?: boolean;
+  imageGenerationError?: string;
   generatedAt?: string;
 }
 

@@ -1,10 +1,11 @@
 import { Platform } from 'react-native';
 import { WeatherData, Gender } from '../../types/weather';
-import { OutfitLookbook, TpoCategory, OutfitItem } from '../../types/outfit';
+import { OutfitLookbook, TpoCategory, OutfitItem, GenerationStage } from '../../types/outfit';
 import { getTemperatureBand } from '../../constants/temperatureBands';
 import { findMatchingLookbooks } from '../../data/presetLookbooks';
 import { generateFashionImageWithFlux } from './fluxService';
 import { buildItemImagePrompt } from '../../utils/promptBuilder';
+import { ensureAiSession, aiErrorMessage } from './session';
 
 export interface DeepSeekOotdResult {
   success: boolean;
@@ -98,6 +99,20 @@ function selectBestPresetImageForAi(gender: Gender, weather: WeatherData, tpo: T
   return require('../../../assets/lookbooks/female_trendy_22c_1.jpg');
 }
 
+export async function retryLookbookImage(lookbook: OutfitLookbook, onStageChange?: (stage: GenerationStage) => void): Promise<OutfitLookbook> {
+  onStageChange?.('image');
+  try {
+    const result = await generateFashionImageWithFlux(buildItemImagePrompt(lookbook.items, lookbook.gender), 25000);
+    return result.success && result.imageUrl
+      ? { ...lookbook, imageUrl: result.imageUrl, imageSource: 'ai', imageGenerationFailed: false, imageGenerationError: undefined }
+      : { ...lookbook, imageGenerationFailed: true, imageGenerationError: result.errorMessage || '이미지 생성에 실패했어요. 사진만 다시 생성해 주세요.' };
+  } catch (error: any) {
+    return { ...lookbook, imageGenerationFailed: true, imageGenerationError: error?.message || '이미지 생성에 실패했어요.' };
+  } finally {
+    onStageChange?.(null);
+  }
+}
+
 /**
  * DeepSeek V4.1 Flash와 TheHive Flux Schnell을 이용한 End-to-End AI 코디 및 실사 화보 생성
  */
@@ -105,7 +120,8 @@ export async function generateOotdWithDeepSeek(
   weather: WeatherData,
   tpo: TpoCategory,
   gender: Gender,
-  styleMood?: string
+  styleMood?: string,
+  onStageChange?: (stage: GenerationStage) => void
 ): Promise<DeepSeekOotdResult> {
   const { baseUrl, model } = getDeepSeekConfig();
 
@@ -169,9 +185,11 @@ export async function generateOotdWithDeepSeek(
 
 날씨 방어 태그에는 비가 오면 #우산_필수, #방수소재 등을, 일교차가 크면 #레이어링, 쌀쌀하면 #체온유지 등의 실용적인 행동 지침 3~4개를 넣어주세요.`;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 18000);
+  onStageChange?.('recommendation');
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 18000);
+    await ensureAiSession(controller.signal);
 
     const isProxy = baseUrl.startsWith('/');
     const endpoint = isProxy
@@ -200,14 +218,12 @@ export async function generateOotdWithDeepSeek(
       signal: controller.signal,
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`TheHive DeepSeek API 오류 (${response.status}): ${errText}`);
+      throw new Error(await aiErrorMessage(response));
     }
 
     const data = await response.json();
+    clearTimeout(timeoutId);
     const rawContent = data.choices?.[0]?.message?.content;
 
     if (!rawContent) {
@@ -231,20 +247,8 @@ export async function generateOotdWithDeepSeek(
 
     // 화면에 표시하는 동일한 아이템 목록으로 이미지 생성 지시문을 구성합니다.
     const imagePrompt = buildItemImagePrompt(items, gender);
-    let finalImageUrl: any = selectBestPresetImageForAi(gender, weather, tpo);
-    let imageGenerationFailed = true;
-    try {
-      const fluxResult = await generateFashionImageWithFlux(imagePrompt, 20000);
-      if (fluxResult.success && fluxResult.imageUrl) {
-        finalImageUrl = fluxResult.imageUrl;
-        imageGenerationFailed = false;
-      }
-    } catch (fluxErr) {
-      console.warn('Flux 실시간 이미지 생성 실패 -> 고화질 룩북 프리셋 폴백:', fluxErr);
-    }
-
     const tempBand = getTemperatureBand(weather.temperature).id;
-    const aiLookbook: OutfitLookbook = {
+    const baseLookbook: OutfitLookbook = {
       id: `ai_deepseek_${Date.now()}`,
       gender,
       tempBand,
@@ -253,12 +257,13 @@ export async function generateOotdWithDeepSeek(
       styleTitle: parsed.styleTitle || '감각적인 날씨 맞춤 코디',
       styleDescription: parsed.styleDescription || '날씨와 상황에 맞춰 새롭게 디자인된 착장입니다.',
       weatherDefenseTags: parsed.weatherDefenseTags || ['#오늘의_OOTD', '#실시간_추천'],
-      imageUrl: finalImageUrl,
+      imageUrl: selectBestPresetImageForAi(gender, weather, tpo),
       items,
-      imageSource: imageGenerationFailed ? 'preset' : 'ai',
-      imageGenerationFailed,
+      imageSource: 'preset',
+      imageGenerationFailed: true,
       generatedAt: new Date().toISOString(),
     };
+    const aiLookbook = await retryLookbookImage(baseLookbook, onStageChange);
 
     return {
       success: true,
@@ -273,7 +278,10 @@ export async function generateOotdWithDeepSeek(
     console.warn('DeepSeek AI 코디 추천 호출 실패:', error);
     return {
       success: false,
-      errorMessage: error?.message || 'DeepSeek 연동 실패',
+      errorMessage: error?.name === 'AbortError' ? '코디 작성 시간이 초과됐어요. 다시 시도해 주세요.' : error?.message || '코디를 작성하지 못했어요. 다시 시도해 주세요.',
     };
+  } finally {
+    clearTimeout(timeoutId);
+    onStageChange?.(null);
   }
 }

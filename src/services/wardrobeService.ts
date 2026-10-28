@@ -1,125 +1,88 @@
 import { OutfitLookbook } from '../types/outfit';
-import { WeatherData } from '../types/weather';
+import { ensureAiSession, aiErrorMessage } from './ai/session';
 
-const STORAGE_KEY_FALLBACK = 'dize_saved_wardrobe';
+const STORAGE_KEY = 'dize_saved_wardrobe';
 
-/**
- * 내 옷장에 코디 저장 (Cloudflare D1 + R2 에뮬레이션)
- */
+function storage(): Storage {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) throw new Error('Unavailable');
+    return window.localStorage;
+  } catch {
+    throw new Error('브라우저 저장이 차단됐어요. 사이트의 저장 권한을 확인해 주세요.');
+  }
+}
+
+function readWardrobe(): OutfitLookbook[] {
+  let saved: string | null;
+  try { saved = storage().getItem(STORAGE_KEY); }
+  catch { throw new Error('브라우저 저장이 차단됐어요. 사이트의 저장 권한을 확인해 주세요.'); }
+  if (!saved) return [];
+  try {
+    const list = JSON.parse(saved);
+    if (!Array.isArray(list) || list.some((item) => !item || typeof item.id !== 'string' || !Array.isArray(item.items))) throw new Error('Invalid wardrobe');
+    return list;
+  } catch {
+    throw new Error('저장된 옷장 정보를 읽지 못했어요. 기존 데이터는 그대로 보관했습니다.');
+  }
+}
+
+function writeWardrobe(list: OutfitLookbook[]) {
+  const target = storage();
+  const encoded = JSON.stringify(list);
+  target.setItem(STORAGE_KEY, encoded);
+  if (target.getItem(STORAGE_KEY) !== encoded) throw new Error('저장 결과를 확인하지 못했어요.');
+}
+
+async function durableImage(imageUrl: OutfitLookbook['imageUrl']) {
+  const uri = typeof imageUrl === 'string' ? imageUrl : imageUrl?.uri;
+  if (typeof uri !== 'string') throw new Error('사진이 로딩된 뒤 다시 저장해 주세요.');
+  if (uri.startsWith('data:')) return uri;
+  // Generated image URLs expire, so keep the image bytes with this browser's wardrobe.
+  const signal = AbortSignal.timeout(15000);
+  const remote = uri.startsWith('https://hive-data-prod-cdn.thehive.ai/');
+  if (remote) await ensureAiSession(signal);
+  const response = remote
+    ? await fetch('/api/ai/photo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: uri }), signal })
+    : await fetch(uri, { signal });
+  if (!response.ok) throw new Error(remote ? await aiErrorMessage(response) : '사진을 보관하지 못했어요. 네트워크를 확인하고 다시 저장해 주세요.');
+  const blob = await response.blob();
+  if (!blob.type.startsWith('image/')) throw new Error('사진 형식을 확인하지 못했어요.');
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error('사진을 보관하지 못했어요. 다시 시도해 주세요.'));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function saveOutfitToWardrobe(
   outfit: OutfitLookbook,
-  weather: WeatherData
 ): Promise<{ success: boolean; outfit?: OutfitLookbook; errorMessage?: string }> {
-  const payload = {
-    id: outfit.id,
-    styleTitle: outfit.styleTitle,
-    styleDescription: outfit.styleDescription,
-    gender: outfit.gender,
-    tempBand: outfit.tempBand,
-    weatherState: outfit.weatherState,
-    temperature: weather.temperature,
-    tpo: outfit.tpo || 'daily',
-    weatherDefenseTags: outfit.weatherDefenseTags || [],
-    items: outfit.items || [],
-    imageUrl: outfit.imageUrl,
-    imageSource: outfit.imageSource,
-    imageGenerationFailed: outfit.imageGenerationFailed,
-    generatedAt: outfit.generatedAt,
-  };
-
   try {
-    const res = await fetch('/api/wardrobe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      throw new Error(`서버 저장 오류 (${res.status})`);
-    }
-
-    const data = await res.json();
-    if (data.success && data.outfit) {
-      // 로컬 스토리지에도 동기화 백업
-      syncToLocalStorage(data.outfit);
-      return { success: true, outfit: data.outfit };
-    }
-    throw new Error(data.error || '저장 응답 실패');
-  } catch (err: any) {
-    console.warn('D1/R2 API 저장 실패, 로컬 백업으로 보관:', err);
-    // 오프라인 / 폴백 로컬 저장
-    syncToLocalStorage(outfit);
-    return { success: true, outfit };
+    readWardrobe();
+    const savedOutfit = { ...outfit, imageUrl: await durableImage(outfit.imageUrl) };
+    // Re-read after downloading: preserve saves made in another tab while waiting.
+    writeWardrobe([savedOutfit, ...readWardrobe().filter((item) => item.id !== outfit.id)]);
+    return { success: true, outfit: savedOutfit };
+  } catch (error: any) {
+    const message = error?.name === 'QuotaExceededError'
+      ? '브라우저 저장 공간이 부족해요. 필요 없는 코디를 삭제한 뒤 다시 저장해 주세요.'
+      : error?.name === 'TimeoutError' || error?.name === 'TypeError'
+        ? '사진을 보관하지 못했어요. 네트워크를 확인하고 다시 저장해 주세요.'
+        : error?.message || '코디를 저장하지 못했어요. 브라우저 저장 설정을 확인해 주세요.';
+    return { success: false, errorMessage: message };
   }
 }
 
-/**
- * 내 옷장에 저장된 전체 코디 목록 조회 (D1)
- */
 export async function fetchWardrobeOutfits(): Promise<OutfitLookbook[]> {
-  try {
-    const res = await fetch('/api/wardrobe');
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && Array.isArray(data.outfits)) {
-        return data.outfits;
-      }
-    }
-  } catch (err) {
-    console.warn('D1 옷장 목록 조회 실패, 로컬 캐시 조회:', err);
-  }
-
-  // 로컬 폴백 목록
-  return getLocalStorageOutfits();
+  return readWardrobe();
 }
 
-/**
- * 내 옷장에서 코디 삭제 (D1 + R2)
- */
 export async function deleteOutfitFromWardrobe(id: string): Promise<boolean> {
   try {
-    const res = await fetch(`/api/wardrobe?id=${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    });
-    if (res.ok) {
-      removeFromLocalStorage(id);
-      return true;
-    }
-  } catch (err) {
-    console.warn('D1 삭제 실패:', err);
+    writeWardrobe(readWardrobe().filter((item) => item.id !== id));
+    return true;
+  } catch {
+    return false;
   }
-
-  removeFromLocalStorage(id);
-  return true;
-}
-
-function syncToLocalStorage(outfit: OutfitLookbook) {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      const list = getLocalStorageOutfits();
-      const filtered = list.filter((item) => item.id !== outfit.id);
-      filtered.unshift(outfit);
-      window.localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify(filtered));
-    } catch { /* 로컬 백업이 불가능해도 서버 저장 결과는 유지합니다. */ }
-  }
-}
-
-function removeFromLocalStorage(id: string) {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      const list = getLocalStorageOutfits();
-      const filtered = list.filter((item) => item.id !== id);
-      window.localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify(filtered));
-    } catch { /* 저장소 접근 실패 시 서버 삭제 결과를 유지합니다. */ }
-  }
-}
-
-function getLocalStorageOutfits(): OutfitLookbook[] {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    try {
-      const saved = window.localStorage.getItem(STORAGE_KEY_FALLBACK);
-      if (saved) return JSON.parse(saved);
-    } catch { /* 손상된 로컬 캐시는 빈 옷장으로 처리합니다. */ }
-  }
-  return [];
 }
