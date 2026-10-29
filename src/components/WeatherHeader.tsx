@@ -10,13 +10,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { WeatherData } from '../types/weather';
+import { formatLocationLabel } from '../utils/locationLabel';
 
-// 기온 숫자: 기존 48px 대비 3.5배
+// 기온 숫자: 기존 48px 기준. 3.5배(168px)에서 60% 줄여 1.4배(약 67px)
 const TEMP_FONT_BASE = 48;
-const TEMP_FONT_SCALE = 3.5;
-const TEMP_FONT_SIZE = TEMP_FONT_BASE * TEMP_FONT_SCALE;
+const TEMP_FONT_SCALE = 3.5 * (1 - 0.6);
+const TEMP_FONT_SIZE = Math.round(TEMP_FONT_BASE * TEMP_FONT_SCALE);
 const HEADER_HORIZONTAL_PADDING = 20;
-const STATE_ICON_SIZE = 36;
+const STATE_ICON_SIZE = 32;
 const TEMP_ROW_GAP = 8;
 
 /**
@@ -84,7 +85,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
         <View style={styles.locationBlock}>
           <View style={styles.locationRow}>
             <Text style={styles.locationText} numberOfLines={1}>
-              {weather.locationName}
+              {formatLocationLabel(weather.locationName)}
             </Text>
             {weather.isSimulated && <Text style={styles.simulatedTag}>테스트</Text>}
           </View>
@@ -127,7 +128,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
         />
       </View>
 
-      {/* 3. 오늘의 체감 한마디 (덥다 / 선선하다 / 춥다 ...) — 기온 좌측 하단 */}
+      {/* 3. 오늘의 체감 한마디 (더워요 / 선선해요 / 추워요 ...) — 기온 좌측 하단 */}
       {!!weather.apparentKeyword && (
         <Text style={styles.apparentText}>{weather.apparentKeyword}</Text>
       )}

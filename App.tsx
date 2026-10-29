@@ -8,7 +8,7 @@ import { OutfitLookbook, TpoCategory, GenerationStage } from './src/types/outfit
 import { getTemperatureBand } from './src/constants/temperatureBands';
 import { findMatchingLookbooks } from './src/data/presetLookbooks';
 import { getCurrentLocation, getCachedLocation } from './src/services/locationService';
-import { fetchCurrentWeather, getCachedWeather } from './src/services/weatherService';
+import { fetchCurrentWeather, getCachedWeather, getApparentWeatherKeywords } from './src/services/weatherService';
 
 import { FullscreenBackground } from './src/components/FullscreenBackground';
 import { WeatherHeader } from './src/components/WeatherHeader';
@@ -66,7 +66,7 @@ export default function App() {
       temperature: 18,
       tempMax: 21,
       tempMin: 12,
-      apparentKeyword: '선선하다',
+      apparentKeyword: getApparentWeatherKeywords(18, 'Clear').apparentKeyword,
       weatherStateKeyword: '날씨 확인중',
       weatherState: 'Clear',
       weatherDescription: '맑음',
@@ -169,20 +169,8 @@ export default function App() {
     state: WeatherState,
     description: string
   ) => {
-    let apparentKeyword = '선선하다';
-    if (temp >= 28) apparentKeyword = '덥다';
-    else if (temp >= 23) apparentKeyword = '따뜻하다';
-    else if (temp >= 20) apparentKeyword = '선선하다';
-    else if (temp >= 17) apparentKeyword = '약간 쌀쌀';
-    else if (temp >= 12) apparentKeyword = '쌀쌀하다';
-    else if (temp >= 9) apparentKeyword = '꽤 쌀쌀';
-    else if (temp >= 5) apparentKeyword = '춥다';
-    else apparentKeyword = '매우 춥다';
-
-    let weatherStateKeyword = '맑음';
-    if (state === 'Rain') weatherStateKeyword = '비온다';
-    else if (state === 'Snow') weatherStateKeyword = '눈온다';
-    else if (state === 'Clouds') weatherStateKeyword = '흐리다';
+    // 체감 문구는 weatherService의 단일 정의를 사용 (중복 정의로 문구가 어긋나지 않게)
+    const { apparentKeyword, weatherStateKeyword } = getApparentWeatherKeywords(temp, state);
 
     setWeather((prev) => ({
       ...prev,

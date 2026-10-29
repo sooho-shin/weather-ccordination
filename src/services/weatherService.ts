@@ -10,7 +10,12 @@ export function getCachedWeather(): WeatherData | null {
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY_WEATHER);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as WeatherData;
+        // 문구가 바뀌어도 이전 방문 때 저장된 옛 문구가 보이지 않도록 기온에서 다시 계산
+        if (typeof parsed.temperature === 'number' && parsed.weatherState) {
+          return { ...parsed, ...getApparentWeatherKeywords(parsed.temperature, parsed.weatherState) };
+        }
+        return parsed;
       }
     } catch {}
   }
@@ -38,15 +43,16 @@ export function getApparentWeatherKeywords(
   apparentKeyword: string;
   weatherStateKeyword: string;
 } {
-  let apparentKeyword = '선선하다';
-  if (temperature >= 28) apparentKeyword = '덥다';
-  else if (temperature >= 23) apparentKeyword = '따뜻하다';
-  else if (temperature >= 20) apparentKeyword = '선선하다';
-  else if (temperature >= 17) apparentKeyword = '약간 쌀쌀';
-  else if (temperature >= 12) apparentKeyword = '쌀쌀하다';
-  else if (temperature >= 9) apparentKeyword = '꽤 쌀쌀';
-  else if (temperature >= 5) apparentKeyword = '춥다';
-  else apparentKeyword = '매우 춥다';
+  // 화면에 그대로 노출되는 문구 (해요체)
+  let apparentKeyword = '선선해요';
+  if (temperature >= 28) apparentKeyword = '더워요';
+  else if (temperature >= 23) apparentKeyword = '따뜻해요';
+  else if (temperature >= 20) apparentKeyword = '선선해요';
+  else if (temperature >= 17) apparentKeyword = '약간 쌀쌀해요';
+  else if (temperature >= 12) apparentKeyword = '쌀쌀해요';
+  else if (temperature >= 9) apparentKeyword = '꽤 쌀쌀해요';
+  else if (temperature >= 5) apparentKeyword = '추워요';
+  else apparentKeyword = '매우 추워요';
 
   let weatherStateKeyword = '맑음';
   if (weatherState === 'Rain') weatherStateKeyword = '비온다';

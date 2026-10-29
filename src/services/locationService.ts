@@ -1,11 +1,12 @@
 import { Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { LocationData } from '../types/weather';
+import { formatLocationLabel } from '../utils/locationLabel';
 
 export const DEFAULT_FALLBACK_LOCATION: LocationData = {
   latitude: 37.5665,
   longitude: 126.978,
-  name: '서울특별시 중구',
+  name: '서울특별시',
 };
 
 const STORAGE_KEY_LOCATION = 'dize_last_location';
@@ -102,7 +103,8 @@ export async function getCurrentLocation(): Promise<LocationData> {
         const place = reverse[0];
         const region = place.region || place.city || '';
         const district = place.district || place.subregion || '';
-        name = `${region} ${district}`.trim() || '현재 위치';
+        // 서울은 구 단위 없이 시 단위로만 표기
+        name = formatLocationLabel(`${region} ${district}`) || '현재 위치';
       }
     } catch {
       name = '현재 위치';
