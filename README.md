@@ -16,12 +16,11 @@
    - **한겨울 눈보라 한파 (4°C 이하 강설)**: 구스다운 패딩, 롱 무스탕, 몬스터 파카, 캐시미어 코트 등.
    - **우천 비오는 날 (Rain)**: 발수 윈드브레이커, 싱글 레인 트렌치, 고어텍스 쉘, 레인부츠 코디 등.
 3. **직관적인 순환 및 탐색 인터랙션**
-   - 하단 카드를 **좌우로 밀거나 페이지 점을 눌러** 스타일을 순환.
-   - 우상단 **햄버거 메뉴**에서 성별·코디 종류(출근/데일리/스트릿)·코디 셔플·AI 맞춤·내 옷장·날씨 시뮬레이터 이용.
+   - 하단 시트 **'다음 코디'** 버튼으로 5가지 스타일 즉시 순환 (`1/5` ~ `5/5`).
+   - 상단 헤더 **새로고침** 버튼 및 화면 좌우 체브론 플로팅 화살표 지원.
    - 웹 브라우저 환경에서 키보드 방향키(`←`, `→`) 네비게이션 지원.
-4. **하단 코디 카드**
-   - 흰색 카드에 코디 제목·설명(기온 굵게 표시), 아우터/상의/하의/신발 등 아이템 행, 페이지 점, **저장** 버튼.
-   - 상단에는 3.5배 크기의 현재 기온과 날씨 아이콘, 현재 위치·최저~최고 기온을 표시합니다.
+4. **하단 글래스모피즘 코디 가이드 시트**
+   - `expo-blur` 기반 반투명 블러 카드와 아우터, 상의, 하의, 신발 개별 아이템 칩.
 5. **실시간 GPS 위치 및 날씨 연동 (Open-Meteo)**
    - 오프라인 또는 위치 거부 시 서울 기본 위치 자동 폴백.
    - 한국 표준 8단계 기온대 자동 분류.
@@ -66,8 +65,8 @@ npx expo start --android
 python3 scripts/run_harness.py
 ```
 
-### 배포
-- **자동 배포(권장)**: `main`에 푸시하면 GitHub Actions(`.github/workflows/deploy.yml`)가 타입체크·유닛 테스트 후 `https://dize-weather.pages.dev`에 배포합니다. 아래 설정이 끝나기 전에는 배포를 건너뜁니다.
+### 배포 및 CI/CD
+- **자동 배포(권장)**: `main`에 푸시하면 GitHub Actions(`.github/workflows/deploy.yml`)가 타입체크·유닛 테스트 후 `https://dize-weather.pages.dev`에 자동 배포합니다. (상세 가이드: [CI/CD 설정 가이드](docs/guides/ci-cd-setup.md))
   1. Cloudflare 대시보드 → My Profile → API Tokens → Create Token → 권한 `Account / Cloudflare Pages / Edit` 으로 토큰 생성 (`dize-weather` 프로젝트가 있는 계정)
   2. Workers & Pages 화면 오른쪽의 **Account ID** 복사
   3. GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret 으로 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 등록
@@ -76,16 +75,3 @@ python3 scripts/run_harness.py
 
 
 ## AI 호출 보호 및 옷장 저장
-
-- AI 요청은 `/api/ai/session`에서 만든 서명된 HttpOnly 쿠키가 필요합니다. 로그인 없는 서비스이므로 이 세션은 계정 인증이 아니며, 쿠키를 새로 발급해도 IP별·전체 한도가 함께 적용됩니다.
-- 한국 시간 자정 기준 세션별 코디 작성/사진 생성 각각 10회, IP별 각각 20회, IP별 전체 1분 4회입니다. 서비스 전체는 하루 코디 작성 100회·사진 생성 50회로 제한합니다. 사진 재시도와 외부 서비스 실패 요청도 예약된 횟수에 포함합니다.
-- 모델·출력 토큰·이미지 장수·크기는 서버에서 고정합니다. JSON 요청은 16KB, 이미지 지시문은 1024자까지 허용합니다. 보호용 DB나 비밀값이 없으면 유료 호출을 거부합니다.
-- `AI_LIMITS` D1 바인딩은 호출 횟수만 저장합니다. 원본 IP 대신 HMAC 값을 기록하며 현재 일일 한도 구간만 유지합니다. 한도 예약은 단일 조건부 SQL 쓰기로 처리합니다.
-- 사진 보관용 복사는 Hive 생성 이미지 호스트만 허용하고 리다이렉트를 거부합니다. 최대 4MB, 세션 하루 20회·IP 하루 40회·서비스 하루 150회·IP 분당 4회로 제한하며 AI 생성 횟수와 별도로 집계합니다.
-- 운영 비밀값 `HIVE_SECRET_KEY`, `AI_SESSION_SECRET`은 Cloudflare Pages Secret으로 설정합니다. `AI_SESSION_SECRET`은 충분히 긴 난수여야 하며 프런트엔드 환경변수에 넣지 않습니다.
-- 운영 DB 초기화: `npx wrangler d1 execute dize-ai-limits --remote --file migrations/0001_ai_usage.sql`. 기존 데이터는 삭제하지 않습니다.
-- 옷장은 계정 없이 공유 서버에 저장하지 않습니다. 기존 `dize_saved_wardrobe` 키를 계속 사용하며 이 브라우저에 사진 데이터와 메타데이터를 보관합니다. 사진 URL 만료, 저장 용량 초과, 저장 차단을 처리하고 실제 저장에 성공한 경우에만 보관 완료로 표시합니다. 다른 기기와 동기화되지 않으며 브라우저 데이터를 지우면 삭제됩니다.
-- 현재 기온대·날씨·성별·TPO가 맞는 AI 코디만 메인에 표시합니다. 사진만 재시도할 때는 기존 아이템과 설명을 유지하고 코디 작성 API를 다시 호출하지 않습니다.
-- 구버전 유료 API 우회를 막기 위해 Pages의 Preview access 보호를 유지합니다. 이전 해시 배포 주소는 Cloudflare Access 로그인이 필요하며 공개 서비스는 `https://dize-weather.pages.dev`입니다.
-
-검증: `python3 scripts/run_harness.py`. 호출 보호는 실제 SQLite의 병렬 조건부 쓰기, 옷장은 저장 실패·사진 데이터 보관·재조회·삭제, AI는 단계 전환·이미지 단독 재시도를 테스트합니다.
