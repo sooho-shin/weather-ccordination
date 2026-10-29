@@ -1,7 +1,36 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native';
+import React, { useState } from 'react';
+import {
+  LayoutChangeEvent,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Gender, WeatherData } from '../types/weather';
+
+// 기온 숫자: 기존 48px 대비 3.5배
+const TEMP_FONT_BASE = 48;
+const TEMP_FONT_SCALE = 3.5;
+const TEMP_FONT_SIZE = TEMP_FONT_BASE * TEMP_FONT_SCALE;
+const HEADER_HORIZONTAL_PADDING = 20;
+const STATE_ICON_SIZE = 24;
+const TEMP_ROW_GAP = 6;
+
+/**
+ * 기온 숫자가 가로 폭을 넘지 않도록 글자 수에 맞춰 폰트 크기를 줄인다.
+ * (영하 두 자리 같은 긴 값에서도 잘리지 않게 하는 안전장치. 일반적인 값은 3.5배 그대로.)
+ */
+const getTemperatureFontSize = (text: string, availableWidth: number): number => {
+  const widthInEm = Array.from(text).reduce((sum, ch) => {
+    if (ch === '-') return sum + 0.4;
+    if (ch === '°') return sum + 0.45;
+    return sum + 0.6;
+  }, 0);
+  return Math.min(TEMP_FONT_SIZE, Math.floor(availableWidth / widthInEm));
+};
 
 interface WeatherHeaderProps {
   weather: WeatherData;
@@ -22,6 +51,14 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   onOpenWardrobe,
   isWeatherReady = true,
 }) => {
+  const { width: windowWidth } = useWindowDimensions();
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  const handleLayout = (e: LayoutChangeEvent) => {
+    const w = Math.round(e.nativeEvent.layout.width);
+    if (w !== containerWidth) setContainerWidth(w);
+  };
+
   const getWeatherIcon = () => {
     switch (weather.weatherState) {
       case 'Clear':
@@ -55,12 +92,19 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
   const apparentBadge = weather.apparentKeyword || '선선하다';
   const stateBadge = weather.weatherStateKeyword || weather.weatherDescription;
 
+  const temperatureText = `${weather.temperature}°`;
+  const availableTempWidth =
+    (containerWidth || windowWidth) -
+    HEADER_HORIZONTAL_PADDING * 2 -
+    STATE_ICON_SIZE -
+    TEMP_ROW_GAP;
+  const temperatureFontSize = getTemperatureFontSize(temperatureText, availableTempWidth);
+
   return (
-    <View style={styles.container}>
-      {/* 1. 상단 브랜딩 바: dize. 로고 및 위치 */}
+    <View style={styles.container} onLayout={handleLayout}>
+      {/* 1. 상단 바: 위치 및 유틸리티 버튼 */}
       <View style={styles.topBar}>
         <View style={styles.brandRow}>
-          <Text style={styles.brandLogo}>dize.</Text>
           <View style={styles.locationBadge}>
             <Ionicons name="location-sharp" size={12} color="rgba(255, 255, 255, 0.9)" />
             <Text style={styles.locationText} numberOfLines={1}>
@@ -89,7 +133,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
             activeOpacity={0.7}
             accessibilityLabel="날씨 시뮬레이터"
           >
-            <Ionicons name="options-outline" size={17} color="#FFFFFF" />
+            <Ionicons name="menu" size={20} color="#FFFFFF" />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -105,23 +149,35 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
       </View>
 
       {/* 2. 메인 체감 날씨 및 기온 정보 */}
-      <View style={styles.weatherMainRow}>
-        <View style={styles.tempSection}>
-          <View style={styles.tempRow}>
-            <Text style={styles.temperature}>{weather.temperature}°</Text>
-            <Ionicons
-              name={getWeatherIcon()}
-              size={24}
-              color={getWeatherIconColor()}
-              style={styles.stateIcon}
-            />
-          </View>
-
-          {/* 최고/최저 기온 */}
-          <Text style={styles.rangeText}>
-            최고 {weather.tempMax ?? weather.temperature + 3}° / 최저 {weather.tempMin ?? weather.temperature - 4}°
+      <View style={styles.weatherMain}>
+        <View style={styles.tempRow}>
+          <Text
+            style={[
+              styles.temperature,
+              {
+                fontSize: temperatureFontSize,
+                lineHeight: Math.round(temperatureFontSize * 1.1),
+                letterSpacing: -Math.round(temperatureFontSize * 0.03),
+              },
+            ]}
+            numberOfLines={1}
+          >
+            {temperatureText}
           </Text>
+          <Ionicons
+            name={getWeatherIcon()}
+            size={STATE_ICON_SIZE}
+            color={getWeatherIconColor()}
+            style={styles.stateIcon}
+          />
+        </View>
 
+        {/* 최고/최저 기온 */}
+        <Text style={styles.rangeText}>
+          최고 {weather.tempMax ?? weather.temperature + 3}° / 최저 {weather.tempMin ?? weather.temperature - 4}°
+        </Text>
+
+        <View style={styles.weatherMetaRow}>
           {/* 체감 키워드 뱃지 그룹 */}
           <View style={styles.badgeRow}>
             <View style={styles.apparentBadge}>
@@ -131,7 +187,6 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
               <Text style={styles.stateBadgeText}>{stateBadge}</Text>
             </View>
           </View>
-        </View>
 
         {/* 3. 성별 선택 (여 / 남 / 모두 3버튼) */}
         <View style={styles.genderControl}>
@@ -167,6 +222,7 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+        </View>
       </View>
     </View>
   );
@@ -188,15 +244,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  brandLogo: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    letterSpacing: -1,
-    textShadowColor: 'rgba(0, 0, 0, 0.4)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
   },
   locationBadge: {
     flexDirection: 'row',
@@ -247,28 +294,28 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFD60A',
   },
-  weatherMainRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  tempSection: {
-    flex: 1,
+  weatherMain: {
+    alignItems: 'stretch',
   },
   tempRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: TEMP_ROW_GAP,
   },
+  // fontSize / lineHeight / letterSpacing은 화면 폭에 맞춰 컴포넌트에서 계산해 덮어쓴다.
   temperature: {
-    fontSize: 48,
+    fontSize: TEMP_FONT_SIZE,
     fontWeight: '300',
     color: '#FFFFFF',
-    letterSpacing: -1.5,
     textShadowColor: 'rgba(0, 0, 0, 0.4)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 6,
-    lineHeight: 52,
+  },
+  weatherMetaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
   },
   stateIcon: {
     marginBottom: 6,
@@ -327,7 +374,6 @@ const styles = StyleSheet.create({
   },
   genderControl: {
     alignItems: 'flex-end',
-    marginBottom: 2,
   },
   genderToggle: {
     flexDirection: 'row',
