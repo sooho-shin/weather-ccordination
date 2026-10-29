@@ -66,6 +66,14 @@ npx expo start --android
 python3 scripts/run_harness.py
 ```
 
+### 배포
+- **자동 배포(권장)**: `main`에 푸시하면 GitHub Actions(`.github/workflows/deploy.yml`)가 타입체크·유닛 테스트 후 `https://dize-weather.pages.dev`에 배포합니다. 아래 설정이 끝나기 전에는 배포를 건너뜁니다.
+  1. Cloudflare 대시보드 → My Profile → API Tokens → Create Token → 권한 `Account / Cloudflare Pages / Edit` 으로 토큰 생성 (`dize-weather` 프로젝트가 있는 계정)
+  2. Workers & Pages 화면 오른쪽의 **Account ID** 복사
+  3. GitHub 저장소 → Settings → Secrets and variables → Actions → New repository secret 으로 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 등록
+  4. Actions 탭 → *Deploy to Cloudflare Pages* → Run workflow 로 현재 `main`을 한 번 배포
+- **수동 배포**: `npm run deploy` (사전에 `npx wrangler login` 필요)
+
 
 ## AI 호출 보호 및 옷장 저장
 
