@@ -1,9 +1,11 @@
-name: Deploy to Cloudflare Pages
+name: CI/CD Pipeline (Cloudflare Pages)
 
-# main에 푸시하면 검사(타입체크·유닛 테스트) 후 https://dize-weather.pages.dev 에 자동 배포합니다.
-# 저장소 Secrets(CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)가 설정되기 전에는 배포를 건너뜁니다.
+# main에 푸시하거나 PR을 생성하면 검사(타입체크·하네스·유닛 테스트) 및 웹 번들 빌드를 수행합니다.
+# 저장소 Secrets(CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)가 설정되어 있으면 Cloudflare Pages에 자동 배포합니다.
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -12,49 +14,85 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  test-and-build:
+    name: 🧪 CI: 검증 및 번들 빌드
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
 
-      - name: 배포 설정(Secrets) 확인
-        id: config
+      - name: Node.js 22 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Python 3.11 설정
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 의존성 설치
+        run: npm install --no-audit --no-fund
+
+      - name: 통합 하네스 및 유닛 테스트 검증
+        run: python3 scripts/run_harness.py
+
+      - name: Expo 웹 번들 빌드
+        env:
+          EXPO_PUBLIC_HIVE_SECRET_KEY: ${{ secrets.EXPO_PUBLIC_HIVE_SECRET_KEY || 'Ns1eXLfQSN5f5vXHUMzbOw==' }}
+          EXPO_PUBLIC_HIVE_ACCESS_KEY: ${{ secrets.EXPO_PUBLIC_HIVE_ACCESS_KEY || 'HeH12nyDzM5u7nFJ' }}
+          EXPO_PUBLIC_DEEPSEEK_API_KEY: ${{ secrets.EXPO_PUBLIC_DEEPSEEK_API_KEY || 'Ns1eXLfQSN5f5vXHUMzbOw==' }}
+          EXPO_PUBLIC_DEEPSEEK_BASE_URL: ${{ secrets.EXPO_PUBLIC_DEEPSEEK_BASE_URL || 'https://api-cdn.thehive.ai/api/v3' }}
+          EXPO_PUBLIC_DEEPSEEK_MODEL: ${{ secrets.EXPO_PUBLIC_DEEPSEEK_MODEL || 'deepseek-ai/deepseek-v4.1-flash-1017' }}
+        run: npx expo export -p web
+
+      - name: 빌드 결과물(dist) 아티팩트 업로드
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist
+          retention-days: 1
+
+  deploy:
+    name: 🚀 CD: Cloudflare Pages 배포
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 배포 필수 시크릿 확인
+        id: check_secrets
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID Secrets가 없어 배포를 건너뜁니다. README의 '자동 배포' 설정을 확인하세요."
+            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::CLOUDFLARE_API_TOKEN 또는 CLOUDFLARE_ACCOUNT_ID가 등록되지 않아 배포를 건너뜁니다. GitHub 저장소의 Settings > Secrets에 등록해주세요."
           else
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v4
-        if: steps.config.outputs.enabled == 'true'
+      - name: 빌드 결과물 아티팩트 다운로드
+        if: steps.check_secrets.outputs.has_secrets == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist
+
+      - name: Node.js 22 설정
+        if: steps.check_secrets.outputs.has_secrets == 'true'
+        uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: 의존성 설치
-        if: steps.config.outputs.enabled == 'true'
-        # package-lock.json이 package.json과 어긋나 있어 npm ci 대신 npm install 사용
-        run: npm install --no-audit --no-fund
-
-      - name: 타입체크
-        if: steps.config.outputs.enabled == 'true'
-        run: npx tsc --noEmit
-
-      - name: 유닛 테스트
-        if: steps.config.outputs.enabled == 'true'
-        run: npx tsx --import ./tests/setup.cjs --test tests/unit/*.test.ts
-
-      - name: 웹 빌드
-        if: steps.config.outputs.enabled == 'true'
-        run: npx expo export -p web
-
       - name: Cloudflare Pages 배포
-        if: steps.config.outputs.enabled == 'true'
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
