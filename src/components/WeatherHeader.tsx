@@ -126,6 +126,11 @@ export const WeatherHeader: React.FC<WeatherHeaderProps> = ({
           style={styles.stateIcon}
         />
       </View>
+
+      {/* 3. 오늘의 체감 한마디 (덥다 / 선선하다 / 춥다 ...) — 기온 좌측 하단 */}
+      {!!weather.apparentKeyword && (
+        <Text style={styles.apparentText}>{weather.apparentKeyword}</Text>
+      )}
     </View>
   );
 };
@@ -198,5 +203,16 @@ const styles = StyleSheet.create({
   },
   stateIcon: {
     marginBottom: 6,
+  },
+  apparentText: {
+    marginTop: -4,
+    marginLeft: 4,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.4,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 });
