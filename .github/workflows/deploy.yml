@@ -14,10 +14,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  test-and-build:
-    name: "CI: 검증 및 번들 빌드"
+  build-and-deploy:
+    name: "CI/CD: 검증, 빌드 및 배포"
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: "코드 체크아웃"
         uses: actions/checkout@v4
@@ -47,53 +47,20 @@ jobs:
           EXPO_PUBLIC_DEEPSEEK_MODEL: ${{ secrets.EXPO_PUBLIC_DEEPSEEK_MODEL || 'deepseek-ai/deepseek-v4.1-flash-1017' }}
         run: npx expo export -p web
 
-      - name: "빌드 결과물(dist) 아티팩트 업로드"
+      - name: "Cloudflare Pages 자동 배포"
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-bundle
-          path: dist
-          retention-days: 1
-
-  deploy:
-    name: "CD: Cloudflare Pages 배포"
-    needs: test-and-build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: "코드 체크아웃"
-        uses: actions/checkout@v4
-
-      - name: "배포 필수 시크릿 확인"
-        id: check_secrets
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RAW_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RAW_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "has_secrets=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::CLOUDFLARE_API_TOKEN 또는 CLOUDFLARE_ACCOUNT_ID가 등록되지 않아 배포를 건너뜁니다. GitHub 저장소의 Settings > Secrets에 등록해주세요."
-          else
-            echo "has_secrets=true" >> "$GITHUB_OUTPUT"
+          # Secrets 값의 앞뒤 공백 및 개행문자(\r, \n) 자동 제거 (Headers.set 에러 원천 방지)
+          CLEAN_TOKEN=$(echo "$RAW_TOKEN" | tr -d '\r\n ')
+          CLEAN_ACCOUNT_ID=$(echo "$RAW_ACCOUNT_ID" | tr -d '\r\n ')
+
+          if [ -z "$CLEAN_TOKEN" ] || [ -z "$CLEAN_ACCOUNT_ID" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN 또는 CLOUDFLARE_ACCOUNT_ID가 비어있어 배포를 건너뜁니다."
+            exit 0
           fi
 
-      - name: "빌드 결과물 아티팩트 다운로드"
-        if: steps.check_secrets.outputs.has_secrets == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: dist-bundle
-          path: dist
-
-      - name: "Node.js 22 설정"
-        if: steps.check_secrets.outputs.has_secrets == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: "Cloudflare Pages 배포"
-        if: steps.check_secrets.outputs.has_secrets == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler pages deploy dist --project-name dize-weather --branch main
+          echo "🚀 Cloudflare Pages로 배포를 시작합니다..."
+          CLOUDFLARE_API_TOKEN="$CLEAN_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLEAN_ACCOUNT_ID" npx wrangler pages deploy dist --project-name dize-weather --branch main
