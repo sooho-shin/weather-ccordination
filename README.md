@@ -1,5 +1,8 @@
 # 🌦️ Weather Coordination (날씨 기반 실사 패션 코디 추천 앱)
 
+[![CI/CD Pipeline](https://github.com/sooho-shin/weather-ccordination/actions/workflows/deploy.yml/badge.svg)](https://github.com/sooho-shin/weather-ccordination/actions/workflows/deploy.yml)
+[![Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-F38020?logo=cloudflare&logoColor=white)](https://dize-weather.pages.dev)
+
 현재 위치의 실시간 날씨와 기온에 맞춘 남/여 고감도 실사 패션 룩북 및 세부 아이템(아우터, 상의, 하의, 신발 등)을 추천해주는 **Expo / React Native** 모바일 애플리케이션입니다.
 
 ---
