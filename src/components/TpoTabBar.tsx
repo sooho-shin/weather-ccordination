@@ -7,13 +7,13 @@ interface TpoTabBarProps {
   onSelectTpo: (tpo: TpoCategory) => void;
 }
 
-interface TpoOption {
+export interface TpoOption {
   key: TpoCategory;
   label: string;
   subLabel: string;
 }
 
-const TPO_OPTIONS: TpoOption[] = [
+export const TPO_OPTIONS: TpoOption[] = [
   { key: 'office', label: '출근 / 단정', subLabel: '오피스·포멀' },
   { key: 'daily', label: '데일리 / 캐주얼', subLabel: '편안한 일상' },
   { key: 'street', label: '스트릿 / 힙', subLabel: '트렌디·고프코어' },

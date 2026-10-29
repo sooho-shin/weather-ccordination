@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { StyleSheet, View, SafeAreaView, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, SafeAreaView, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 
 import { Gender, WeatherData, WeatherState } from './src/types/weather';
@@ -13,7 +12,7 @@ import { fetchCurrentWeather, getCachedWeather } from './src/services/weatherSer
 
 import { FullscreenBackground } from './src/components/FullscreenBackground';
 import { WeatherHeader } from './src/components/WeatherHeader';
-import { TpoTabBar } from './src/components/TpoTabBar';
+import { MenuSheet } from './src/components/MenuSheet';
 import { StyleGuideSheet } from './src/components/StyleGuideSheet';
 import { AIGenerationModal } from './src/components/AIGenerationModal';
 import { WeatherSimulatorModal } from './src/components/WeatherSimulatorModal';
@@ -21,6 +20,7 @@ import { WardrobeModal } from './src/components/WardrobeModal';
 import { generateOotdWithDeepSeek, retryLookbookImage } from './src/services/ai/deepseekService';
 import { saveOutfitToWardrobe, fetchWardrobeOutfits } from './src/services/wardrobeService';
 import { matchesLookbookContext, matchesLookbookWeather } from './src/utils/lookbookContext';
+import { useHorizontalSwipe } from './src/hooks/useHorizontalSwipe';
 
 export default function App() {
   // 0. 웹 및 네이티브 폰트 안전 로드
@@ -88,10 +88,17 @@ export default function App() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [operationNotice, setOperationNotice] = useState<string | null>(null);
 
+  const [menuVisible, setMenuVisible] = useState(false);
   const [simulatorVisible, setSimulatorVisible] = useState(false);
   const [aiModalVisible, setAiModalVisible] = useState(false);
   const [wardrobeVisible, setWardrobeVisible] = useState(false);
   const [savedOutfitIds, setSavedOutfitIds] = useState<Set<string>>(() => new Set());
+
+  // 메뉴 시트를 닫은 뒤 다른 모달/동작을 연다 (네이티브에서 모달 두 개가 겹쳐 뜨지 않도록 약간 지연)
+  const runAfterMenuClose = useCallback((action: () => void) => {
+    setMenuVisible(false);
+    setTimeout(action, Platform.OS === 'web' ? 0 : 350);
+  }, []);
 
   // 2. 실시간 GPS 위치 및 실제 날씨 비동기 로딩
   const loadRealWeather = useCallback(async () => {
@@ -213,6 +220,9 @@ export default function App() {
     );
   }, [availableLookbooks.length]);
 
+  // 하단 카드를 좌우로 밀어서 룩북 넘기기
+  const swipeHandlers = useHorizontalSwipe(handlePrevLookbook, handleNextLookbook);
+
   // 웹 브라우저 환경에서 좌우 방향키로 룩북 넘기기 지원
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -332,56 +342,23 @@ export default function App() {
 
       {/* 2. 안전 영역 내 오버레이 UI */}
       <SafeAreaView style={styles.safeArea}>
-        {/* 상단: dize. 브랜딩, 체감 뱃지, 최고/최저 기온, 성별 토글 */}
+        {/* 상단: 큰 현재 기온, 현재 위치/최저~최고, 햄버거 메뉴 */}
         <View>
           <WeatherHeader
             weather={weather}
-            gender={gender}
-            onSelectGender={handleSelectGender}
-            onOpenSimulator={() => setSimulatorVisible(true)}
-            onOpenAIGenerator={() => setAiModalVisible(true)}
-            onOpenWardrobe={() => setWardrobeVisible(true)}
+            onOpenMenu={() => setMenuVisible(true)}
             isWeatherReady={isWeatherReady}
           />
-
-          {/* 중앙 상단: TPO 3분할 탭 바 ([ 출근/단정 ] [ 데일리/캐주얼 ] [ 스트릿/힙 ]) */}
-          <TpoTabBar
-            selectedTpo={selectedTpo}
-            onSelectTpo={handleSelectTpo}
-          />
         </View>
 
-        {/* 좌우 코디 넘기기 플로팅 버튼 */}
-        <View style={styles.sideNavRow} pointerEvents="box-none">
-          <TouchableOpacity
-            style={styles.navChevronBtn}
-            onPress={handlePrevLookbook}
-            activeOpacity={0.7}
-            accessibilityLabel="이전 코디"
-          >
-            <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navChevronBtn}
-            onPress={handleNextLookbook}
-            activeOpacity={0.7}
-            accessibilityLabel="다음 코디"
-          >
-            <Ionicons name="chevron-forward" size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-
-        {/* 하단: 글래스모피즘 코디 가이드 시트 (날씨 방어 태그 + 셔플 버튼 + 세부 아이템 칩) */}
+        {/* 하단: 코디 카드 (제목/설명 + 아이템 목록 + 페이지 점 + 저장). 좌우로 밀어서 코디 넘기기 */}
         {currentLookbook && (
           <StyleGuideSheet
             lookbook={currentLookbook}
             currentIndex={safeIndex}
             totalCount={availableLookbooks.length}
             onSelectIndex={(index) => setActiveSlideIndex(index)}
-            onShuffle={handleShuffleLookbook}
-            onOpenAIGenerator={() => setAiModalVisible(true)}
-            onQuickAiGenerate={() => { void handleGenerate(); }}
+            swipeHandlers={swipeHandlers}
             onSaveToWardrobe={handleSaveCurrentOutfit}
             isSavedToWardrobe={Boolean(currentLookbook && savedOutfitIds.has(currentLookbook.id))}
             isAiGenerating={isAiGenerating}
@@ -395,6 +372,22 @@ export default function App() {
       </SafeAreaView>
 
       {/* 3. 모달 레이어 */}
+      <MenuSheet
+        visible={menuVisible}
+        onClose={() => setMenuVisible(false)}
+        gender={gender}
+        onSelectGender={handleSelectGender}
+        selectedTpo={selectedTpo}
+        onSelectTpo={handleSelectTpo}
+        canShuffle={availableLookbooks.length > 1}
+        onShuffle={() => runAfterMenuClose(handleShuffleLookbook)}
+        isAiGenerating={isAiGenerating}
+        onQuickAiGenerate={() => runAfterMenuClose(() => { void handleGenerate(); })}
+        onOpenAiMood={() => runAfterMenuClose(() => setAiModalVisible(true))}
+        onOpenWardrobe={() => runAfterMenuClose(() => setWardrobeVisible(true))}
+        onOpenSimulator={() => runAfterMenuClose(() => setSimulatorVisible(true))}
+      />
+
       <WeatherSimulatorModal
         visible={simulatorVisible}
         currentWeather={weather}
@@ -431,24 +424,5 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     justifyContent: 'space-between',
-  },
-  sideNavRow: {
-    position: 'absolute',
-    top: '49%',
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    zIndex: 10,
-  },
-  navChevronBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0, 0, 0, 0.38)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
   },
 });

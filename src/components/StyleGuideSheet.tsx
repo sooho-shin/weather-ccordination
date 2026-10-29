@@ -1,26 +1,23 @@
 import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { BlurView } from 'expo-blur';
+import type { GestureResponderHandlers } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { OutfitLookbook, GenerationStage } from '../types/outfit';
-import { OutfitItemCard } from './OutfitItemCard';
+import { GenerationStage, OutfitItemCategory, OutfitLookbook } from '../types/outfit';
 
 interface StyleGuideSheetProps {
   lookbook: OutfitLookbook;
   currentIndex: number;
   totalCount: number;
   onSelectIndex: (index: number) => void;
-  onShuffle: () => void;
-  onOpenAIGenerator: () => void;
-  onQuickAiGenerate?: () => void;
+  /** 좌우로 밀어서 이전/다음 코디로 이동하는 제스처 핸들러 (useHorizontalSwipe 결과) */
+  swipeHandlers?: GestureResponderHandlers;
   onSaveToWardrobe?: () => void;
   isSavedToWardrobe?: boolean;
   isAiGenerating?: boolean;
@@ -31,14 +28,32 @@ interface StyleGuideSheetProps {
   isSaving?: boolean;
 }
 
+const CATEGORY_LABEL: Record<OutfitItemCategory, string> = {
+  outer: '아우터',
+  top: '상의',
+  bottom: '하의',
+  shoes: '신발',
+  accessory: '액세서리',
+};
+
+/** 설명 속 기온(예: 4°, -3°)을 굵게 표시하기 위해 문장을 쪼갠다. */
+const renderDescription = (text?: string) =>
+  (text ?? '').split(/(-?\d+°)/g).map((part, idx) =>
+    /^-?\d+°$/.test(part) ? (
+      <Text key={idx} style={styles.descriptionStrong}>
+        {part}
+      </Text>
+    ) : (
+      part
+    )
+  );
+
 export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   lookbook,
   currentIndex,
   totalCount,
   onSelectIndex,
-  onShuffle,
-  onOpenAIGenerator,
-  onQuickAiGenerate,
+  swipeHandlers,
   onSaveToWardrobe,
   isSavedToWardrobe = false,
   isAiGenerating = false,
@@ -48,34 +63,32 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   notice,
   isSaving = false,
 }) => {
-  const defenseTags = lookbook.weatherDefenseTags || ['#오늘의_OOTD', '#날씨맞춤'];
+  const saveLabel = isSaving ? '저장 중...' : isSavedToWardrobe ? '보관됨' : '저장';
 
   return (
-    <View style={styles.wrapper}>
-      <BlurView intensity={75} tint="light" style={styles.blurContainer}>
-        {/* 1. 상단 헤더: 스타일 타이틀 및 설명 */}
-        <View style={styles.header}>
-          <View style={styles.topBadgeRow}>
-            <View style={styles.guideBadge}>
-              <Text style={styles.guideBadgeText}>
-                OOTD Curation ({currentIndex + 1}/{totalCount})
-              </Text>
-            </View>
-            {(isAiGenerated || lookbook.imageGenerationFailed) && (
-              <View style={styles.aiBadge}>
-                <Ionicons name="sparkles" size={11} color="#FF9500" />
-                <Text style={styles.aiBadgeText}>
-                  {lookbook.imageGenerationFailed ? '기존 사진 · 참고용' : 'AI 맞춤'}
-                </Text>
-              </View>
-            )}
+    <View style={styles.wrapper} {...swipeHandlers}>
+      <View style={styles.card}>
+        {/* 1. 제목 / 설명 */}
+        {(isAiGenerated || lookbook.imageGenerationFailed) && (
+          <View style={styles.aiBadge}>
+            <Ionicons name="sparkles" size={11} color="#D97706" />
+            <Text style={styles.aiBadgeText}>
+              {lookbook.imageGenerationFailed ? '기존 사진 · 참고용' : 'AI 맞춤'}
+            </Text>
           </View>
-          <Text style={styles.title}>{lookbook.styleTitle}</Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
-            {lookbook.styleDescription}
-          </Text>
-        </View>
+        )}
+        <Text style={styles.title}>{lookbook.styleTitle}</Text>
+        <Text style={styles.description}>{renderDescription(lookbook.styleDescription)}</Text>
 
+        {/* 2. 상태 안내 (AI 생성 진행 / 이미지 실패 / 저장 결과 등) */}
+        {isAiGenerating && (
+          <View style={styles.progressRow}>
+            <ActivityIndicator size="small" color="#FF9500" />
+            <Text style={styles.progressText}>
+              {generationStage === 'image' ? '이미지 생성 중...' : '코디 작성 중...'}
+            </Text>
+          </View>
+        )}
         {lookbook.imageGenerationFailed && (
           <View style={styles.imageNotice}>
             <Text style={styles.noticeText} accessibilityRole="alert">
@@ -84,130 +97,88 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
             </Text>
             {onRetryImage && (
               <TouchableOpacity onPress={onRetryImage} disabled={isAiGenerating} accessibilityRole="button">
-                <Text style={styles.retryText}>{generationStage === 'image' ? '사진 생성 중...' : '사진만 다시 생성'}</Text>
+                <Text style={styles.retryText}>
+                  {generationStage === 'image' ? '사진 생성 중...' : '사진만 다시 생성'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
         )}
-        {!!notice && <Text style={styles.noticeText} accessibilityRole="alert">{notice}</Text>}
+        {!!notice && (
+          <Text style={[styles.noticeText, styles.noticeStandalone]} accessibilityRole="alert">
+            {notice}
+          </Text>
+        )}
 
-        {/* 2. 날씨 방어 태그 영역 (기획서 핵심: #우산_필수, #밝은바지_금지 등) */}
-        <View style={styles.defenseTagsRow}>
-          {defenseTags.map((tag, idx) => (
-            <View key={idx} style={styles.tagChip}>
-              <Text style={styles.tagText}>{tag}</Text>
+        {/* 3. 아이템 목록 (아우터 / 상의 / 하의 ...) */}
+        <View style={styles.rows}>
+          {lookbook.items.map((item, idx) => (
+            <View
+              key={item.id}
+              style={[styles.row, idx === lookbook.items.length - 1 && styles.rowLast]}
+            >
+              <Text style={styles.rowLabel}>{CATEGORY_LABEL[item.category] ?? item.category}</Text>
+              <Text style={styles.rowValue} numberOfLines={1}>
+                {item.name}
+              </Text>
             </View>
           ))}
         </View>
 
-        {/* 3. 코디 세부 아이템 가로 스크롤 카드 */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollList}
-        >
-          {lookbook.items.map((item) => (
-            <OutfitItemCard key={item.id} item={item} />
-          ))}
-        </ScrollView>
-
-        {/* 4. 하단 셔플 및 AI 버튼 액션 영역 */}
+        {/* 4. 하단: 페이지 점 + 저장 */}
         <View style={styles.footer}>
-          {/* 페이징 인디케이터 도트 */}
           <View style={styles.paginationDots}>
             {Array.from({ length: totalCount }).map((_, idx) => (
               <TouchableOpacity
                 key={idx}
                 onPress={() => onSelectIndex(idx)}
-                style={[
-                  styles.dot,
-                  idx === currentIndex ? styles.activeDot : styles.inactiveDot,
-                ]}
+                hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
+                accessibilityRole="button"
+                accessibilityLabel={`${idx + 1}번째 코디`}
+                style={[styles.dot, idx === currentIndex ? styles.activeDot : styles.inactiveDot]}
               />
             ))}
           </View>
 
-          {/* 버튼 그룹: 코디 셔플 및 AI 맞춤 추천 */}
-          <View style={styles.buttonGroup}>
+          {onSaveToWardrobe && (
             <TouchableOpacity
-              style={styles.shuffleBtn}
-              onPress={onShuffle}
+              style={[styles.saveBtn, isSavedToWardrobe && styles.saveBtnActive]}
+              onPress={onSaveToWardrobe}
+              disabled={isSaving}
               activeOpacity={0.8}
+              accessibilityLabel="내 옷장에 저장"
             >
-              <Ionicons name="shuffle" size={14} color="#000000" />
-              <Text style={styles.shuffleBtnText}>코디 셔플</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.aiButton, isAiGenerating && styles.aiButtonDisabled]}
-              onPress={onQuickAiGenerate || onOpenAIGenerator}
-              disabled={isAiGenerating}
-              activeOpacity={0.8}
-            >
-              {isAiGenerating ? (
-                <ActivityIndicator size="small" color="#FF9500" style={{ marginRight: 4 }} />
-              ) : (
-                <Ionicons name="sparkles" size={13} color="#FF9500" />
-              )}
-              <Text style={styles.aiButtonLabel}>
-                {isAiGenerating ? (generationStage === 'image' ? '이미지 생성 중...' : '코디 작성 중...') : 'AI 맞춤'}
+              <Ionicons
+                name={isSavedToWardrobe ? 'bookmark' : 'bookmark-outline'}
+                size={18}
+                color={isSavedToWardrobe ? '#FF9500' : '#111111'}
+              />
+              <Text style={[styles.saveText, isSavedToWardrobe && styles.saveTextActive]}>
+                {saveLabel}
               </Text>
             </TouchableOpacity>
-
-            {/* 옷장에 저장 (D1 + R2) 버튼 */}
-            {onSaveToWardrobe && (
-              <TouchableOpacity
-                style={[styles.bookmarkBtn, isSavedToWardrobe && styles.bookmarkBtnActive]}
-                onPress={onSaveToWardrobe}
-                disabled={isSaving}
-                activeOpacity={0.8}
-                accessibilityLabel="내 옷장에 저장"
-              >
-                <Ionicons
-                  name={isSavedToWardrobe ? 'bookmark' : 'bookmark-outline'}
-                  size={14}
-                  color={isSavedToWardrobe ? '#FF9500' : '#000000'}
-                />
-                <Text style={[styles.bookmarkText, isSavedToWardrobe && styles.bookmarkTextActive]}>
-                  {isSaving ? '저장 중...' : isSavedToWardrobe ? '보관됨' : '저장'}
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              style={styles.moreAiBtn}
-              onPress={onOpenAIGenerator}
-              activeOpacity={0.7}
-              accessibilityLabel="AI 무드 선택"
-            >
-              <Ionicons name="options-outline" size={14} color="#666666" />
-            </TouchableOpacity>
-          </View>
+          )}
         </View>
-      </BlurView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  noticeText: { color: '#704400', fontSize: 12, lineHeight: 18 },
-  retryText: { color: '#704400', fontSize: 13, fontWeight: '700', paddingTop: 10 },
-  imageNotice: {
-    color: '#704400',
-    backgroundColor: '#FFF3D6',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 12,
-    fontSize: 12,
-    lineHeight: 18,
-  },
   wrapper: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 24 : 16,
-    left: 16,
-    right: 16,
-    borderRadius: 30,
-    overflow: 'hidden',
+    left: 12,
+    right: 12,
+    // 웹에서 마우스로 밀 때 글자가 선택되지 않게
+    ...Platform.select({ web: { userSelect: 'none' } as any }),
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingHorizontal: 22,
+    paddingTop: 22,
+    paddingBottom: 18,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -223,97 +194,91 @@ const styles = StyleSheet.create({
       } as any,
     }),
   },
-  blurContainer: {
-    backgroundColor:
-      Platform.OS === 'ios' ? 'rgba(255, 255, 255, 0.48)' : 'rgba(255, 255, 255, 0.90)',
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.65)',
-    borderRadius: 30,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  topBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 3,
-  },
-  guideBadge: {
-    backgroundColor: 'rgba(0, 0, 0, 0.06)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  guideBadgeText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#3C3C43',
-    letterSpacing: 0.5,
-  },
   aiBadge: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
     backgroundColor: 'rgba(255, 149, 0, 0.12)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 8,
+    marginBottom: 8,
   },
   aiBadgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     color: '#D97706',
   },
   title: {
-    fontSize: 17,
+    fontSize: 22,
     fontWeight: '800',
-    color: '#000000',
-    letterSpacing: -0.3,
+    color: '#111111',
+    letterSpacing: -0.5,
   },
-  subtitle: {
-    fontSize: 12,
-    color: '#3C3C43',
-    fontWeight: '500',
-    marginTop: 2,
-    textAlign: 'center',
-    paddingHorizontal: 10,
+  description: {
+    marginTop: 8,
+    fontSize: 15,
+    lineHeight: 23,
+    color: '#48484A',
+    fontWeight: '400',
   },
-  defenseTagsRow: {
+  descriptionStrong: {
+    fontWeight: '800',
+    color: '#111111',
+  },
+  progressRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginVertical: 6,
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
   },
-  tagChip: {
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    borderWidth: 0.5,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
-  },
-  tagText: {
-    fontSize: 11,
+  progressText: {
+    fontSize: 13,
     fontWeight: '700',
-    color: '#1C1C1E',
+    color: '#D97706',
   },
-  scrollList: {
-    paddingVertical: 6,
-    paddingHorizontal: 4,
+  imageNotice: {
+    backgroundColor: '#FFF3D6',
+    borderRadius: 10,
+    padding: 10,
+    marginTop: 10,
+  },
+  noticeText: { color: '#704400', fontSize: 12, lineHeight: 18 },
+  noticeStandalone: { marginTop: 10 },
+  retryText: { color: '#704400', fontSize: 13, fontWeight: '700', paddingTop: 10 },
+  rows: {
+    marginTop: 16,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#D1D1D6',
+  },
+  rowLast: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#D1D1D6',
+  },
+  rowLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#111111',
+  },
+  rowValue: {
+    flex: 1,
+    marginLeft: 16,
+    textAlign: 'right',
+    fontSize: 16,
+    color: '#8E8E93',
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.06)',
+    marginTop: 14,
   },
   paginationDots: {
     flexDirection: 'row',
@@ -321,114 +286,38 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dot: {
-    height: 6,
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
   },
   activeDot: {
-    width: 16,
-    backgroundColor: '#000000',
+    width: 28,
+    backgroundColor: '#111111',
   },
   inactiveDot: {
-    width: 6,
-    backgroundColor: 'rgba(0, 0, 0, 0.22)',
+    width: 8,
+    backgroundColor: '#D1D1D6',
   },
-  buttonGroup: {
+  saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  shuffleBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderRadius: 26,
+    borderWidth: 1.5,
+    borderColor: '#111111',
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
-      } as any,
-    }),
   },
-  shuffleBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#000000',
-  },
-  aiButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 11,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 149, 0, 0.3)',
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 2,
-      },
-      web: {
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
-      } as any,
-    }),
-  },
-  aiButtonLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#FF9500',
-  },
-  aiButtonDisabled: {
-    opacity: 0.6,
-  },
-  bookmarkBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 9,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 3,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
-  },
-  bookmarkBtnActive: {
+  saveBtnActive: {
     borderColor: '#FF9500',
     backgroundColor: 'rgba(255, 149, 0, 0.06)',
   },
-  bookmarkText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#000000',
+  saveText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111111',
   },
-  bookmarkTextActive: {
+  saveTextActive: {
     color: '#FF9500',
-  },
-  moreAiBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.08)',
   },
 });

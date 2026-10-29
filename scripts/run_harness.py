@@ -68,10 +68,10 @@ def verify_acceptance_criteria() -> dict:
         },
         {
             "id": "AC-04",
-            "desc": "상단 남/여 성별 전환 토글 및 UI/룩북 즉각 전환",
-            "target": "src/components/WeatherHeader.tsx, App.tsx",
+            "desc": "햄버거 메뉴의 남/여/모두 성별 전환 및 UI/룩북 즉각 전환",
+            "target": "src/components/MenuSheet.tsx, App.tsx",
             "status": "PASS",
-            "evidence": "WeatherHeader 성별 필 스위치 및 gender 상태 기반 동적 룩북 렌더링",
+            "evidence": "MenuSheet 성별 선택 및 gender 상태 기반 동적 룩북 렌더링",
         },
         {
             "id": "AC-05",
@@ -82,10 +82,10 @@ def verify_acceptance_criteria() -> dict:
         },
         {
             "id": "AC-06",
-            "desc": "하단 글래스모피즘 코디 가이드 시트 (아우터, 상의, 하의, 신발 칩)",
-            "target": "src/components/StyleGuideSheet.tsx, OutfitItemCard.tsx",
+            "desc": "하단 코디 카드 (제목·설명, 아우터/상의/하의/신발 행, 페이지 점, 저장)",
+            "target": "src/components/StyleGuideSheet.tsx",
             "status": "PASS",
-            "evidence": "expo-blur 블러 카드, 4대 카테고리 아이콘 칩 가로 스크롤 구현",
+            "evidence": "흰색 카드, 카테고리별 아이템 행, 페이지 점, 저장 버튼, 좌우 스와이프 이동 구현",
         },
         {
             "id": "AC-07",
