@@ -53,9 +53,32 @@ jobs:
           RAW_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           RAW_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # 1. Bearer 접두사, 앞뒤 따옴표, 공백, 줄바꿈(\r, \n) 자동 정제
-          CLEAN_TOKEN=$(echo "$RAW_TOKEN" | sed -E 's/^[bB][eE][aA][rR][eE][rR][[:space:]]+//' | tr -d '\r\n "'\''')
-          CLEAN_ACCOUNT_ID=$(echo "$RAW_ACCOUNT_ID" | tr -d '\r\n "'\''')
+          # 1. 40자리 Cloudflare API 토큰 및 32자리 계정 ID 정밀 추출
+          # (curl 명령어 전체, Bearer 접두사, 공백, 줄바꿈, 따옴표 등이 포함되어 있어도 자동 추출)
+          CLEAN_TOKEN=$(python3 -c '
+import os, re, sys
+raw = os.environ.get("RAW_TOKEN", "")
+m = re.search(r"Bearer\s+([a-zA-Z0-9_-]{40})", raw, re.IGNORECASE)
+if m:
+    print(m.group(1))
+    sys.exit(0)
+m2 = re.search(r"([a-zA-Z0-9_-]{40})", raw)
+if m2:
+    print(m2.group(1))
+    sys.exit(0)
+cleaned = re.sub(r"[\r\n \"\x27\\]", "", raw)
+cleaned = re.sub(r"^[bB][eE][aA][rR][eE][rR]", "", cleaned)
+print(cleaned)
+')
+          CLEAN_ACCOUNT_ID=$(python3 -c '
+import os, re
+raw = os.environ.get("RAW_ACCOUNT_ID", "")
+m = re.search(r"([0-9a-fA-F]{32})", raw)
+if m:
+    print(m.group(1).lower())
+else:
+    print(re.sub(r"[\r\n \"\x27\\]", "", raw).lower())
+')
 
           if [ -z "$CLEAN_TOKEN" ] || [ -z "$CLEAN_ACCOUNT_ID" ]; then
             echo "::warning::CLOUDFLARE_API_TOKEN 또는 CLOUDFLARE_ACCOUNT_ID가 비어있어 배포를 건너뜁니다."
