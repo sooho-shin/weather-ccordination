@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -64,23 +64,82 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
   isSaving = false,
 }) => {
   const saveLabel = isSaving ? '저장 중...' : isSavedToWardrobe ? '보관됨' : '저장';
+  // 사진을 가리지 않도록 기본은 접힌 상태(제목만). 제목을 누르면 설명·아이템이 펼쳐진다.
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <View style={styles.wrapper} {...swipeHandlers}>
-      <View style={styles.card}>
-        {/* 1. 제목 / 설명 */}
-        {(isAiGenerated || lookbook.imageGenerationFailed) && (
-          <View style={styles.aiBadge}>
-            <Ionicons name="sparkles" size={11} color="#D97706" />
-            <Text style={styles.aiBadgeText}>
-              {lookbook.imageGenerationFailed ? '기존 사진 · 참고용' : 'AI 맞춤'}
-            </Text>
+      {/* 페이지 점: 카드 밖, 사진 위에 띄운다 */}
+      {totalCount > 1 && (
+        <View style={styles.dotsWrap} pointerEvents="box-none">
+          <View style={styles.paginationDots}>
+            {Array.from({ length: totalCount }).map((_, idx) => (
+              <TouchableOpacity
+                key={idx}
+                onPress={() => onSelectIndex(idx)}
+                hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
+                accessibilityRole="button"
+                accessibilityLabel={`${idx + 1}번째 코디`}
+                style={[styles.dot, idx === currentIndex ? styles.activeDot : styles.inactiveDot]}
+              />
+            ))}
           </View>
-        )}
-        <Text style={styles.title}>{lookbook.styleTitle}</Text>
-        <Text style={styles.description}>{renderDescription(lookbook.styleDescription)}</Text>
+        </View>
+      )}
 
-        {/* 2. 상태 안내 (AI 생성 진행 / 이미지 실패 / 저장 결과 등) */}
+      <View style={styles.card}>
+        {/* 1. 헤더: 제목(눌러서 펼치기) + 저장 */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.titleButton}
+            onPress={() => setExpanded((v) => !v)}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            accessibilityLabel={`${lookbook.styleTitle}, 상세 ${expanded ? '접기' : '펼치기'}`}
+          >
+            {(isAiGenerated || lookbook.imageGenerationFailed) && (
+              <View style={styles.aiBadge}>
+                <Ionicons name="sparkles" size={11} color="#D97706" />
+                <Text style={styles.aiBadgeText}>
+                  {lookbook.imageGenerationFailed ? '기존 사진 · 참고용' : 'AI 맞춤'}
+                </Text>
+              </View>
+            )}
+            <View style={styles.titleRow}>
+              <Text style={styles.title} numberOfLines={expanded ? undefined : 1}>
+                {lookbook.styleTitle}
+              </Text>
+              <Ionicons
+                name={expanded ? 'chevron-down' : 'chevron-up'}
+                size={18}
+                color="#8E8E93"
+                style={styles.chevron}
+              />
+            </View>
+          </TouchableOpacity>
+
+          {onSaveToWardrobe && (
+            <TouchableOpacity
+              style={[styles.saveBtn, isSavedToWardrobe && styles.saveBtnActive]}
+              onPress={onSaveToWardrobe}
+              disabled={isSaving}
+              activeOpacity={0.8}
+              accessibilityLabel="내 옷장에 저장"
+            >
+              <Ionicons
+                name={isSavedToWardrobe ? 'bookmark' : 'bookmark-outline'}
+                size={16}
+                color={isSavedToWardrobe ? '#FF9500' : '#111111'}
+              />
+              <Text style={[styles.saveText, isSavedToWardrobe && styles.saveTextActive]}>
+                {saveLabel}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* 2. 진행/실패/알림은 접힌 상태에서도 보인다 */}
         {isAiGenerating && (
           <View style={styles.progressRow}>
             <ActivityIndicator size="small" color="#FF9500" />
@@ -110,55 +169,26 @@ export const StyleGuideSheet: React.FC<StyleGuideSheetProps> = ({
           </Text>
         )}
 
-        {/* 3. 아이템 목록 (아우터 / 상의 / 하의 ...) */}
-        <View style={styles.rows}>
-          {lookbook.items.map((item, idx) => (
-            <View
-              key={item.id}
-              style={[styles.row, idx === lookbook.items.length - 1 && styles.rowLast]}
-            >
-              <Text style={styles.rowLabel}>{CATEGORY_LABEL[item.category] ?? item.category}</Text>
-              <Text style={styles.rowValue} numberOfLines={1}>
-                {item.name}
-              </Text>
+        {/* 3. 펼침 영역: 설명 · 아이템 목록 */}
+        {expanded && (
+          <>
+            <Text style={styles.description}>{renderDescription(lookbook.styleDescription)}</Text>
+
+            <View style={styles.rows}>
+              {lookbook.items.map((item, idx) => (
+                <View
+                  key={item.id}
+                  style={styles.row}
+                >
+                  <Text style={styles.rowLabel}>{CATEGORY_LABEL[item.category] ?? item.category}</Text>
+                  <Text style={styles.rowValue} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
-
-        {/* 4. 하단: 페이지 점 + 저장 */}
-        <View style={styles.footer}>
-          <View style={styles.paginationDots}>
-            {Array.from({ length: totalCount }).map((_, idx) => (
-              <TouchableOpacity
-                key={idx}
-                onPress={() => onSelectIndex(idx)}
-                hitSlop={{ top: 12, bottom: 12, left: 6, right: 6 }}
-                accessibilityRole="button"
-                accessibilityLabel={`${idx + 1}번째 코디`}
-                style={[styles.dot, idx === currentIndex ? styles.activeDot : styles.inactiveDot]}
-              />
-            ))}
-          </View>
-
-          {onSaveToWardrobe && (
-            <TouchableOpacity
-              style={[styles.saveBtn, isSavedToWardrobe && styles.saveBtnActive]}
-              onPress={onSaveToWardrobe}
-              disabled={isSaving}
-              activeOpacity={0.8}
-              accessibilityLabel="내 옷장에 저장"
-            >
-              <Ionicons
-                name={isSavedToWardrobe ? 'bookmark' : 'bookmark-outline'}
-                size={18}
-                color={isSavedToWardrobe ? '#FF9500' : '#111111'}
-              />
-              <Text style={[styles.saveText, isSavedToWardrobe && styles.saveTextActive]}>
-                {saveLabel}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+          </>
+        )}
       </View>
     </View>
   );
@@ -176,9 +206,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 28,
-    paddingHorizontal: 22,
-    paddingTop: 22,
-    paddingBottom: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -194,6 +223,27 @@ const styles = StyleSheet.create({
       } as any,
     }),
   },
+  dotsWrap: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  titleButton: {
+    flex: 1,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  chevron: {
+    marginLeft: 4,
+  },
   aiBadge: {
     alignSelf: 'flex-start',
     flexDirection: 'row',
@@ -203,7 +253,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   aiBadgeText: {
     fontSize: 11,
@@ -211,13 +261,14 @@ const styles = StyleSheet.create({
     color: '#D97706',
   },
   title: {
-    fontSize: 22,
+    flexShrink: 1,
+    fontSize: 19,
     fontWeight: '800',
     color: '#111111',
     letterSpacing: -0.5,
   },
   description: {
-    marginTop: 8,
+    marginTop: 10,
     fontSize: 15,
     lineHeight: 23,
     color: '#48484A',
@@ -248,19 +299,15 @@ const styles = StyleSheet.create({
   noticeStandalone: { marginTop: 10 },
   retryText: { color: '#704400', fontSize: 13, fontWeight: '700', paddingTop: 10 },
   rows: {
-    marginTop: 16,
+    marginTop: 14,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 11,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#D1D1D6',
-  },
-  rowLast: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#D1D1D6',
   },
   rowLabel: {
     fontSize: 16,
@@ -274,36 +321,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#8E8E93',
   },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 14,
-  },
   paginationDots: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.28)',
   },
   dot: {
     height: 8,
     borderRadius: 4,
   },
   activeDot: {
-    width: 28,
-    backgroundColor: '#111111',
+    width: 22,
+    backgroundColor: '#FFFFFF',
   },
   inactiveDot: {
     width: 8,
-    backgroundColor: '#D1D1D6',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 26,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 22,
     borderWidth: 1.5,
     borderColor: '#111111',
     backgroundColor: '#FFFFFF',
@@ -313,7 +358,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 149, 0, 0.06)',
   },
   saveText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
     color: '#111111',
   },

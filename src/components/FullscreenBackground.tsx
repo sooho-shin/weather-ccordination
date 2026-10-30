@@ -11,7 +11,7 @@ export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imag
   const imageSource = typeof imageUrl === 'string' ? { uri: imageUrl } : imageUrl;
 
   return (
-    <View style={StyleSheet.absoluteFill}>
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
       {/* 웹 브라우저 환경에서는 expo-image의 opacity 버그를 방지하기 위해 표준 RN Web Image 사용 */}
       {Platform.OS === 'web' ? (
         <RNImage
@@ -29,8 +29,7 @@ export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imag
           cachePolicy="memory-disk"
         />
       )}
-      {/* 상단 텍스트 및 하단 카드의 가독성을 위한 은은한 비네팅 레이어 */}
-      <View style={styles.topVignette} pointerEvents="none" />
+      {/* 하단 카드 주변 가독성을 위한 은은한 비네팅 (상단 딤은 제거) */}
       <View style={styles.bottomVignette} pointerEvents="none" />
     </View>
   );
@@ -43,14 +42,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-  },
-  topVignette: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    backgroundColor: 'rgba(0, 0, 0, 0.22)',
   },
   bottomVignette: {
     position: 'absolute',
