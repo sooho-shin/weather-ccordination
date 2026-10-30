@@ -96,7 +96,7 @@ function selectBestPresetImageForAi(gender: Gender, weather: WeatherData, tpo: T
     const randomIndex = Math.floor(Math.random() * presets.length);
     return presets[randomIndex].imageUrl;
   }
-  return require('../../../assets/lookbooks/female_trendy_22c_1.jpg');
+  return require('../../../assets/lookbooks/f_20to22_clear_1.jpg');
 }
 
 export async function retryLookbookImage(lookbook: OutfitLookbook, onStageChange?: (stage: GenerationStage) => void): Promise<OutfitLookbook> {
