@@ -321,7 +321,14 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="light" />
 
-      {/* 0. 상단 날씨 헤더: 사진 뒤에 깔린다 (투명 배경 코디 사진에서 인물이 글자를 일부 가릴 수 있음) */}
+      {/* 0. 풀스크린 실사 배경 화보 (맨 뒤 레이어) */}
+      {currentLookbook && (
+        <FullscreenBackground imageUrl={currentLookbook.imageUrl} onImageReady={(uri) => {
+          loadedImage.current = { id: currentLookbook.id, source: currentLookbook.imageUrl, uri };
+        }} />
+      )}
+
+      {/* 1. 상단 날씨 헤더: 사진 위에 표시 */}
       <SafeAreaView style={styles.headerLayer}>
         <WeatherHeader
           weather={weather}
@@ -330,16 +337,9 @@ export default function App() {
         />
       </SafeAreaView>
 
-      {/* 1. 풀스크린 실사 배경 화보 (터치는 뒤의 헤더로 통과) */}
-      {currentLookbook && (
-        <FullscreenBackground imageUrl={currentLookbook.imageUrl} onImageReady={(uri) => {
-          loadedImage.current = { id: currentLookbook.id, source: currentLookbook.imageUrl, uri };
-        }} />
-      )}
-
       {/* 2. 안전 영역 내 오버레이 UI */}
       <SafeAreaView style={styles.safeArea} pointerEvents="box-none">
-        {/* 상단 날씨 헤더는 사진 뒤 레이어(0번)로 이동. 하단 카드 위치 유지를 위한 빈 자리 */}
+        {/* 상단 날씨 헤더는 별도 레이어(1번). 하단 카드 위치 유지를 위한 빈 자리 */}
         <View />
 
         {/* 하단: 페이지 점(카드 밖) + 접이식 코디 카드(제목 탭 시 설명·아이템 펼침) + 저장. 좌우로 밀어서 코디 넘기기 */}
