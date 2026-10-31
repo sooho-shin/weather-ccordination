@@ -142,6 +142,8 @@ for (const [name, flux] of [
 
 test('fallback notice is visible only for a failed generation, including when a lookbook is reapplied', () => {
   const ui = load('src/components/StyleGuideSheet.tsx', {
+    // 렌더러 없이 컴포넌트를 함수로 직접 호출하므로 훅은 초기값만 돌려주는 스텁으로 대체
+    react: { ...require('react'), useState: (init: unknown) => [typeof init === 'function' ? (init as () => unknown)() : init, () => {}] },
     'react-native': { View: 'View', Text: 'Text', ScrollView: 'ScrollView', TouchableOpacity: 'Button', ActivityIndicator: 'Spinner', Platform: { select: (x: any) => x.web } , StyleSheet: { create: (x: unknown) => x } },
     'expo-blur': { BlurView: 'BlurView' },
     '@expo/vector-icons': { Ionicons: 'Icon' },
