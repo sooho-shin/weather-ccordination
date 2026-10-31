@@ -18,7 +18,12 @@ export const FullscreenBackground: React.FC<FullscreenBackgroundProps> = ({ imag
           source={imageSource}
           style={styles.image}
           resizeMode="cover"
-          onLoad={(event) => onImageReady?.(event.nativeEvent.source.uri)}
+          onLoad={(event) => {
+            // RN Web은 nativeEvent로 DOM load 이벤트를 넘겨 source가 없다. 로드된 <img>의 src로 주소를 얻는다
+            const native = event.nativeEvent as { source?: { uri?: string }; target?: { src?: string } };
+            const uri = native.source?.uri ?? native.target?.src;
+            if (uri) onImageReady?.(uri);
+          }}
         />
       ) : (
         <ExpoImage
