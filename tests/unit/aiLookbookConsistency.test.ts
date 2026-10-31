@@ -146,6 +146,8 @@ test('fallback notice is visible only for a failed generation, including when a 
     'expo-blur': { BlurView: 'BlurView' },
     '@expo/vector-icons': { Ionicons: 'Icon' },
     './OutfitItemCard': { OutfitItemCard: 'Item' },
+    // 컴포넌트를 렌더러 없이 함수로 직접 호출하므로 훅은 초기값만 돌려주는 스텁으로 대체 (카드는 접힌 상태)
+    react: { ...require('react'), useState: (initial: unknown) => [typeof initial === 'function' ? (initial as () => unknown)() : initial, () => {}] },
   });
   function collect(node: any, predicate: (value: any) => boolean): any[] {
     if (!node || typeof node !== 'object') return [];
